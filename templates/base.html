@@ -1,0 +1,87 @@
+{# =============================================================================
+   templates/base.html  —  REVISED (Foundation Audit corrections applied)
+   Root layout for Royal Exotic Farms. Every page extends this shell.
+
+   AUDIT CHANGES IN THIS FILE:
+     [CF-04] Added analytics_head.html include in <head> (ignore missing).
+     [F5]    Replaced whatsapp_button.html include with the Contact Action
+             System (contact_actions.html, ignore missing). The single
+             WhatsApp FAB is superseded by a unified WhatsApp + Export Inquiry
+             + Email action system, built in Batch 2.
+
+   Context expected (provided by app context processors / config):
+     current_locale   : active locale code, e.g. "en"
+     text_dir         : "ltr" | "rtl" (derived from locale -> drives RTL)
+     supported_locales: list of active locales (e.g. ["en"]; later ["en","ar"])
+     alternate_urls   : { locale: absolute_url } for hreflang
+     nav              : navigation tree -> .primary, .cta, .footer (data/navigation.py)
+     org              : organization identity (name, contact, address, sameAs, ...)
+     certifications   : list of certification records (data/certifications.py)
+     seo              : per-page SEO config (title, description, canonical, og_image, robots, og_type)
+     contact_actions  : ordered contact-action config (Batch 2) -> WhatsApp / Export Inquiry / Email
+     whatsapp_message : prefilled WhatsApp text (config)
+     now_year         : current year (context processor)
+
+   Routing: the <lang> URL prefix is auto-injected into url_for() via
+   url_value_preprocessor + url_defaults registered at APPLICATION level
+   (see audit CF-05). Error handlers must guarantee g.lang is set (CF-06).
+   ============================================================================= #}
+<!doctype html>
+<html lang="{{ current_locale }}" dir="{{ text_dir }}">
+<head>
+  <meta charset="utf-8">
+  {# Mobile-first: responsive viewport is mandatory #}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3B2E">
+
+  {# [CF-04] Analytics head slot (GA4 / Tag Manager). Stub until wired;
+     placed high in <head> per analytics best practice. #}
+  {% include 'partials/analytics_head.html' ignore missing %}
+
+  {# --- SEO: title, description, canonical, hreflang, Open Graph, Twitter --- #}
+  {% include 'partials/head_seo.html' %}
+
+  {# --- Favicons (assets added later; paths reserved) --- #}
+  <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='favicon/favicon-32.png') }}" sizes="32x32">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
+
+  {# --- Fonts + stylesheets are linked in Phase 3C; block reserved (no CSS here) --- #}
+  {% block stylesheets %}{% endblock %}
+
+  {# --- Global Organization structured data (JSON-LD, every page) --- #}
+  {% include 'partials/structured_data.html' %}
+  {# --- Page-specific structured data (Product / Article / BreadcrumbList) --- #}
+  {% block structured_data %}{% endblock %}
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  {# Accessibility: keyboard skip link; first focusable element, logical order #}
+  <a class="skip-link" href="#main-content">{{ _('Skip to main content') }}</a>
+
+  {# Site header / primary navigation (banner landmark).
+     Mobile navigation is now a dialog overlay (audit CF-01) defined in header.html. #}
+  {% include 'partials/header.html' %}
+
+  {# Primary landmark: each page fills the content block #}
+  <main id="main-content" role="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Site footer (contentinfo landmark) #}
+  {% include 'partials/footer.html' %}
+
+  {# [F5] Unified Contact Action System (WhatsApp / Export Inquiry / Email).
+     Supersedes the former whatsapp_button.html. Built in Batch 2;
+     `ignore missing` keeps this shell runnable until then. #}
+  {% include 'partials/contact_actions.html' ignore missing %}
+
+  {# JavaScript is added in a later phase; block reserved, no JS in foundation.
+     JS-phase contract (audit CF-07): mobile-nav dialog open/close, focus trap,
+     Escape-to-dismiss with focus return; contact-actions expand toggle. #}
+  {% block scripts %}{% endblock %}
+</body>
+</html>
