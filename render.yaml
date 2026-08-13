@@ -1,0 +1,58 @@
+# render.yaml — Render.com deployment blueprint.
+# Postgres + web service. Set secrets in the Render dashboard (marked sync:false).
+services:
+  - type: web
+    name: royal-exotic-farms
+    runtime: python
+    plan: starter
+    buildCommand: "pip install -r requirements.txt"
+    # Migrations run once per deploy (before promotion) — not per worker/instance,
+    # and a failed migration blocks the bad release from going live.
+    preDeployCommand: "flask --app wsgi db upgrade"
+    startCommand: "gunicorn -c gunicorn.conf.py wsgi:app"
+    healthCheckPath: "/robots.txt"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: royal-exotic-farms-db
+          property: connectionString
+      - key: SITE_URL
+        sync: false
+      - key: SITE_NAME
+        value: Royal Exotic Farms
+      - key: DEFAULT_OG_IMAGE
+        value: img/brand/og-default.jpg
+      - key: ORG_EMAIL
+        sync: false
+      - key: ORG_PHONE
+        sync: false
+      - key: ORG_WHATSAPP
+        sync: false
+      - key: SUPPORTED_LOCALES
+        value: en
+      - key: MAIL_SERVER
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USE_TLS
+        value: "true"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: SUBMISSION_NOTIFY_EMAIL
+        sync: false
+      - key: MAIL_SUPPRESS_SEND
+        value: "false"
+
+databases:
+  - name: royal-exotic-farms-db
+    plan: starter
