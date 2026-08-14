@@ -1,0 +1,33 @@
+{# =============================================================================
+   templates/errors/404.html
+   404 Not Found — helpful, professional, recovery-focused. Extends base.html;
+   consumes ONLY approved Batch 2 components. No new components, no CSS, no JS.
+
+   The error handler must ensure g.lang is set (audit CF-06) and should pass an
+   seo dict with robots "noindex, nofollow" and a suitable title. The base
+   header/footer/nav guard against missing nav/org, so this renders safely with
+   minimal context.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+
+{% block body_class %}page-error page-error-404{% endblock %}
+
+{% block content %}
+<section class="error" aria-labelledby="error-title">
+  {{ section_opener(
+      eyebrow=_("Page not found"),
+      heading=_("We couldn't find that page"),
+      lead=_("The page may have moved, or the link may be incorrect. Here are some useful places to continue."),
+      heading_level='h1',
+      heading_id='error-title') }}
+  <div class="error__actions">
+    {{ button(_("Go to homepage"), endpoint='main.home', variant='primary') }}
+    {{ button(_("View products"), endpoint='products.index', variant='secondary') }}
+    {{ button(_("Export Inquiry"), endpoint='forms.export_inquiry_page', variant='tertiary') }}
+    {{ button(_("Contact us"), endpoint='main.contact', variant='tertiary') }}
+  </div>
+</section>
+{% endblock %}

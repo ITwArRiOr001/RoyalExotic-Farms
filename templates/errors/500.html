@@ -1,0 +1,30 @@
+{# =============================================================================
+   templates/errors/500.html
+   500 Server Error — professional, reassuring, non-technical. Extends base.html;
+   consumes ONLY approved Batch 2 components. No new components, no CSS, no JS.
+
+   The error handler must ensure g.lang is set (audit CF-06) and should pass an
+   seo dict with robots "noindex, nofollow" and a suitable title. No technical
+   detail or stack information is shown to the visitor.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+
+{% block body_class %}page-error page-error-500{% endblock %}
+
+{% block content %}
+<section class="error" aria-labelledby="error-title">
+  {{ section_opener(
+      eyebrow=_("Something went wrong"),
+      heading=_("We're having a temporary problem"),
+      lead=_("This is on our side, not yours. Please try again shortly. If you need to reach us, the options below still work."),
+      heading_level='h1',
+      heading_id='error-title') }}
+  <div class="error__actions">
+    {{ button(_("Go to homepage"), endpoint='main.home', variant='primary') }}
+    {{ button(_("Contact us"), endpoint='main.contact', variant='secondary') }}
+  </div>
+</section>
+{% endblock %}
