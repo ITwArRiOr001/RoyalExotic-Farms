@@ -1,0 +1,52 @@
+{# =============================================================================
+   templates/partials/certifications_section.html
+   Reusable Certifications & Registrations section (component matrix).
+   Renders the certifications registry via the certification_card macro.
+
+   Used on: home, about (full mode); a compact variant is also available
+   (Architecture Lock §1, §5). The footer uses its own inline badge row.
+
+   DATA-DRIVEN (include-based partial). Reads the GLOBAL `certifications`
+   context var (data/certifications.py) by default; behaviour is tuned with
+   optional context vars set before include:
+     {% set cert_section_mode = 'compact' %}
+     {% include 'partials/certifications_section.html' %}
+
+   Context:
+     certifications            : list of cert records (global). Each:
+                                 { code, label, status, document(nullable), badge }
+     cert_section_mode         : 'full' (default) | 'compact'
+                                 -> maps to certification_card mode 'full' | 'badge'
+     cert_section_title        : optional heading override (translatable)
+     cert_section_id           : id for heading + section aria-labelledby
+                                 (default 'certifications-heading')
+     cert_section_heading_level: card heading level (default 'h3', under the
+                                 section <h2>)
+
+   Renders NOTHING when there are no certifications (no empty section).
+   Section heading is a real <h2> (legitimate document section). Card codes are
+   <h3> by default, preserving outline. Responsive: the card list is a fluid
+   grid (Phase 3C); 1 col mobile -> 2 tablet -> 3 desktop. i18n + RTL-safe.
+   ============================================================================= #}
+{% from 'components/cards.html' import certification_card %}
+
+{%- set _items = certifications if (certifications is defined and certifications) else [] -%}
+{%- set _mode = cert_section_mode if (cert_section_mode is defined and cert_section_mode) else 'full' -%}
+{%- set _card_mode = 'badge' if _mode == 'compact' else 'full' -%}
+{%- set _hid = cert_section_id if (cert_section_id is defined and cert_section_id) else 'certifications-heading' -%}
+{%- set _hlevel = cert_section_heading_level if (cert_section_heading_level is defined and cert_section_heading_level) else 'h3' -%}
+
+{%- if _items -%}
+<section class="certifications-section certifications-section--{{ _mode }}" aria-labelledby="{{ _hid }}">
+  <h2 class="certifications-section__heading" id="{{ _hid }}">
+    {{ cert_section_title if (cert_section_title is defined and cert_section_title) else _('Certifications & Registrations') }}
+  </h2>
+  <ul class="certifications-section__list" role="list">
+    {%- for cert in _items %}
+    <li class="certifications-section__item">
+      {{ certification_card(cert, mode=_card_mode, heading_level=_hlevel) }}
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+{%- endif -%}

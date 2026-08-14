@@ -1,0 +1,61 @@
+{# =============================================================================
+   templates/partials/head_seo.html  —  REVISED (Foundation Audit corrections)
+   Centralised SEO <head> output: title, description, robots, canonical,
+   hreflang alternates, Open Graph, Twitter Card.
+
+   AUDIT CHANGES IN THIS FILE:
+     [CF-03] DEFAULT_OG_IMAGE fallback. When a page does not set seo.og_image,
+             the branded application default (config.DEFAULT_OG_IMAGE) is used,
+             so every shared link (WhatsApp / LinkedIn / email — the primary
+             discovery channels for Gulf importers) renders with an image
+             instead of plain text. og:image / twitter:image now always emit
+             when a default is configured.
+
+   Reads:
+     seo            : per-page config -> .title .description .canonical
+                      .og_image .og_type .robots
+     org / config   : site-level identity (org.name fallback config.SITE_NAME)
+     config.DEFAULT_OG_IMAGE : branded 1200x630 fallback share image
+     alternate_urls : { locale: absolute_url } for hreflang (auto-grows with locales)
+     current_locale : active locale
+   Included by base.html inside <head>.
+   ============================================================================= #}
+{% set _site = (org.name if org and org.name else config.SITE_NAME) %}
+{% set _title = (seo.title if seo and seo.title is defined and seo.title else None) %}
+{% set _desc = (seo.description if seo and seo.description is defined and seo.description else None) %}
+{% set _canonical = (seo.canonical if seo and seo.canonical is defined and seo.canonical else request.url) %}
+{# [CF-03] Resolve OG image: explicit per-page value, else branded config default. #}
+{% set _ogimg = (seo.og_image if seo and seo.og_image is defined and seo.og_image else config.DEFAULT_OG_IMAGE) %}
+{% set _ogimg_url = (_ogimg if (_ogimg and '://' in _ogimg) else (url_for('static', filename=_ogimg, _external=True) if _ogimg else None)) %}
+
+<title>{% if _title %}{{ _title }} — {{ _site }}{% else %}{{ _site }}{% endif %}</title>
+
+{% if _desc %}<meta name="description" content="{{ _desc }}">{% endif %}
+<meta name="robots" content="{{ seo.robots if seo and seo.robots is defined and seo.robots else 'index, follow' }}">
+
+{# Canonical: explicit per-page value, else current request URL #}
+<link rel="canonical" href="{{ _canonical }}">
+
+{# hreflang alternates — generated from supported locales; x-default included.
+   When "ar" is activated, its alternate appears automatically (no edits). #}
+{% if alternate_urls %}
+  {% for loc, href in alternate_urls.items() %}
+<link rel="alternate" hreflang="{{ loc }}" href="{{ href }}">
+  {% endfor %}
+<link rel="alternate" hreflang="x-default" href="{{ alternate_urls.get('en', _canonical) }}">
+{% endif %}
+
+{# --- Open Graph --- #}
+<meta property="og:site_name" content="{{ _site }}">
+<meta property="og:type" content="{{ seo.og_type if seo and seo.og_type is defined and seo.og_type else 'website' }}">
+<meta property="og:title" content="{% if _title %}{{ _title }}{% else %}{{ _site }}{% endif %}">
+{% if _desc %}<meta property="og:description" content="{{ _desc }}">{% endif %}
+<meta property="og:url" content="{{ _canonical }}">
+<meta property="og:locale" content="{{ current_locale }}">
+{% if _ogimg_url %}<meta property="og:image" content="{{ _ogimg_url }}">{% endif %}
+
+{# --- Twitter Card --- #}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{% if _title %}{{ _title }}{% else %}{{ _site }}{% endif %}">
+{% if _desc %}<meta name="twitter:description" content="{{ _desc }}">{% endif %}
+{% if _ogimg_url %}<meta name="twitter:image" content="{{ _ogimg_url }}">{% endif %}

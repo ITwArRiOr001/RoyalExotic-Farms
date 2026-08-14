@@ -1,0 +1,88 @@
+{# =============================================================================
+   templates/partials/header.html  —  REVISED (Foundation Audit corrections)
+   Site banner: brand lockup, primary navigation (desktop + mobile dialog),
+   persistent Export Inquiry CTA, language-switcher slot, mobile toggle.
+
+   AUDIT CHANGES IN THIS FILE:
+     [CF-01] Mobile navigation converted from a bare disclosure panel to a
+             proper DIALOG overlay:
+               - Wrapper <div id="mobile-nav" role="dialog" aria-modal="true"
+                 aria-label> owns the id the toggle controls.
+               - A dedicated CLOSE button is the FIRST focusable element inside.
+               - Dialog is `hidden` by default; JS opens it (focus -> close
+                 button), traps focus, and closes on Escape returning focus to
+                 the toggle (JS-phase contract, audit CF-07).
+               - nav.html (mobile mode) no longer sets the id (moved to wrapper).
+
+   Includes partials/nav.html twice via `nav_mode` ("desktop" then "mobile").
+   Reads: org / config (brand), nav (.cta).
+   ============================================================================= #}
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+
+    {# Brand lockup -> home #}
+    <a class="site-header__brand"
+       href="{{ url_for('main.home') }}"
+       aria-label="{{ org.name if org and org.name else config.SITE_NAME }}">
+      <img class="site-header__logo"
+           src="{{ url_for('static', filename='img/brand/logo.svg') }}"
+           alt="{{ org.name if org and org.name else config.SITE_NAME }}"
+           width="180" height="40">
+    </a>
+
+    {# Desktop primary navigation #}
+    {% set nav_mode = 'desktop' %}
+    {% include 'partials/nav.html' %}
+
+    <div class="site-header__actions">
+      {# Persistent primary CTA (label from nav data, lazy-translated) #}
+      {% if nav and nav.cta %}
+      <a class="btn btn--primary site-header__cta" href="{{ url_for(nav.cta.endpoint) }}">
+        {{ nav.cta.label }}
+      </a>
+      {% endif %}
+
+      {# Language switcher: built and hidden in V1; file added in a later batch #}
+      {% include 'partials/language_switcher.html' ignore missing %}
+
+      {# Mobile menu toggle. Controls the dialog below via aria-controls.
+         Open/close behaviour wired in JS phase; ARIA state set now. #}
+      <button class="site-header__toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="mobile-nav"
+              aria-label="{{ _('Open menu') }}">
+        <span class="site-header__toggle-bar" aria-hidden="true"></span>
+        <span class="site-header__toggle-bar" aria-hidden="true"></span>
+        <span class="site-header__toggle-bar" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  {# [CF-01] Mobile navigation DIALOG (full-screen overlay).
+     - role="dialog" + aria-modal="true" => modal semantics for AT.
+     - aria-label gives the dialog its accessible name (avoids heading-outline
+       pollution while closed; consistent with footer heading fix CF-02).
+     - `hidden` by default: when closed it is removed from the a11y tree, the
+       tab order, and the heading/landmark outline regardless of the CSS hide
+       technique chosen in Phase 3C. JS removes `hidden` on open.
+     - The CLOSE button is the first focusable child (focus target on open). #}
+  <div id="mobile-nav"
+       class="mobile-nav-dialog"
+       role="dialog"
+       aria-modal="true"
+       aria-label="{{ _('Site menu') }}"
+       hidden>
+    <div class="mobile-nav-dialog__inner">
+      <button class="mobile-nav-dialog__close"
+              type="button"
+              aria-label="{{ _('Close menu') }}">
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      {# Mobile primary navigation (landmark preserved inside the dialog) #}
+      {% set nav_mode = 'mobile' %}
+      {% include 'partials/nav.html' %}
+    </div>
+  </div>
+</header>

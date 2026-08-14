@@ -1,0 +1,23 @@
+{# =============================================================================
+   templates/partials/whatsapp_button.html
+   Persistent WhatsApp quick-contact (sticky on mobile, discreet on desktop).
+
+   Reads: org.whatsapp_number, whatsapp_message (optional, prefilled text).
+   No JavaScript — it is a plain link. Position/visibility handled by CSS (3C).
+   Renders nothing if no WhatsApp number is configured.
+   ============================================================================= #}
+{% if org and org.whatsapp_number %}
+{% set _wa_msg = (whatsapp_message if whatsapp_message is defined and whatsapp_message else '') %}
+<a class="whatsapp-fab"
+   href="https://wa.me/{{ org.whatsapp_number }}{% if _wa_msg %}?text={{ _wa_msg | urlencode }}{% endif %}"
+   target="_blank"
+   rel="noopener"
+   aria-label="{{ _('Contact us on WhatsApp') }}">
+  {# Decorative icon: empty alt + aria-hidden; the link carries the label #}
+  <img class="whatsapp-fab__icon"
+       src="{{ url_for('static', filename='img/icons/whatsapp.svg') }}"
+       alt="" aria-hidden="true"
+       width="28" height="28">
+  <span class="whatsapp-fab__label">{{ _('WhatsApp') }}</span>
+</a>
+{% endif %}

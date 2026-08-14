@@ -1,0 +1,62 @@
+{# =============================================================================
+   templates/partials/trust_strip.html  —  HARDENED (Batch 2 final pass)
+   Reusable trust / proof strip (component matrix: trust_strip).
+   Surfaces honest proof points (e.g. "Exporting to the Gulf incl. Oman &
+   Abu Dhabi", "Registered & licensed Indian exporter", "Banana-led").
+   Used on: home, product pages, markets, export-inquiry (Architecture Lock §1).
+
+   HARDENING CHANGE [H2] — Defensive optional-icon / label handling:
+     Optional keys are now read with .get() instead of attribute access, so the
+     template is safe under StrictUndefined (some enterprise Flask configs).
+     A mapping without an "icon" key (e.g. {"label": "APEDA Registered"}) no
+     longer risks an UndefinedError. String items, mapping items, and future
+     expanded proof objects are all handled; items with no resolvable label are
+     skipped. Zero template exceptions by construction.
+
+   DATA-DRIVEN (include-based partial). Caller provides context vars before
+   including, e.g.:
+     {% set proof_items = page_proof_items %}
+     {% include 'partials/trust_strip.html' %}
+   or scoped:
+     {% with proof_items = [...] %}{% include 'partials/trust_strip.html' %}{% endwith %}
+
+   Context:
+     proof_items       : list. Each item is either a string, or a mapping with
+                         at least { label } and optionally { icon } (+ any
+                         future keys, which are ignored here).
+     trust_strip_label : optional aria-label override for the region.
+
+   Renders NOTHING when no item resolves to a label (no empty container).
+   Accessibility: labelled region; icons decorative; role="list" preserves list
+   semantics if CSS removes default styling. Mobile-first, i18n, RTL-safe.
+   No CSS / no JS.
+   ============================================================================= #}
+{%- set _items = proof_items if (proof_items is defined and proof_items) else [] -%}
+
+{# Normalise items first (defensive): collect renderable {label, icon} entries. #}
+{%- set ns = namespace(rows=[]) -%}
+{%- for item in _items -%}
+  {%- if item is mapping -%}
+    {%- set _label = item.get('label') -%}
+    {%- set _icon = item.get('icon') -%}
+  {%- else -%}
+    {%- set _label = item -%}
+    {%- set _icon = none -%}
+  {%- endif -%}
+  {%- if _label -%}
+    {%- set _ = ns.rows.append({'label': _label, 'icon': _icon}) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if ns.rows -%}
+<section class="trust-strip" aria-label="{{ trust_strip_label if (trust_strip_label is defined and trust_strip_label) else _('Our credentials') }}">
+  <ul class="trust-strip__list" role="list">
+    {%- for row in ns.rows %}
+    <li class="trust-strip__item">
+      {% if row.icon %}<img class="trust-strip__icon" src="{{ url_for('static', filename='img/icons/' ~ row.icon) }}" alt="" aria-hidden="true" width="28" height="28">{% endif %}
+      <span class="trust-strip__text">{{ row.label }}</span>
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+{%- endif -%}

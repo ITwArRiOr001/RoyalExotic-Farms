@@ -1,0 +1,60 @@
+{# =============================================================================
+   templates/partials/nav.html  —  REVISED (Foundation Audit corrections)
+   Primary navigation, rendered from `nav.primary` (data/navigation.py).
+
+   AUDIT CHANGES IN THIS FILE:
+     [CF-01] Removed `id="mobile-nav"` from the mobile <nav>. The id now lives
+             on the mobile-navigation DIALOG wrapper in header.html (the element
+             the toggle's aria-controls targets). This prevents a duplicate id
+             and keeps the <nav> a clean navigation landmark inside the dialog.
+
+   `nav_mode` ("desktop" | "mobile") selects layout hooks + ARIA labelling.
+   Item shape: { label (lazy-translated), endpoint, children: [ {label, endpoint} ] }
+   Active state via request.endpoint -> aria-current="page".
+   Direction-agnostic markup (no left/right) — mirrors cleanly under RTL.
+   ============================================================================= #}
+{% set is_mobile = (nav_mode == 'mobile') %}
+<nav class="primary-nav primary-nav--{{ nav_mode }}"
+     aria-label="{{ _('Mobile navigation') if is_mobile else _('Primary navigation') }}">
+  <ul class="primary-nav__list">
+    {% for item in (nav.primary if nav and nav.primary else []) %}
+      {% set has_children = item.children and item.children|length > 0 %}
+      <li class="primary-nav__item{% if has_children %} primary-nav__item--has-children{% endif %}">
+        {% if has_children %}
+          {# Disclosure for dropdown/submenu (open/close wired in JS phase) #}
+          <button class="primary-nav__link primary-nav__disclosure"
+                  type="button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-controls="submenu-{{ nav_mode }}-{{ loop.index }}">
+            {{ item.label }}
+          </button>
+          <ul class="primary-nav__submenu" id="submenu-{{ nav_mode }}-{{ loop.index }}">
+            {% for child in item.children %}
+              <li class="primary-nav__subitem">
+                <a class="primary-nav__sublink"
+                   href="{{ url_for(child.endpoint) }}"
+                   {% if request.endpoint == child.endpoint %}aria-current="page"{% endif %}>
+                  {{ child.label }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <a class="primary-nav__link"
+             href="{{ url_for(item.endpoint) }}"
+             {% if request.endpoint == item.endpoint %}aria-current="page"{% endif %}>
+            {{ item.label }}
+          </a>
+        {% endif %}
+      </li>
+    {% endfor %}
+
+    {# CTA repeated inside the mobile panel for thumb reach #}
+    {% if is_mobile and nav and nav.cta %}
+      <li class="primary-nav__item primary-nav__item--cta">
+        <a class="btn btn--primary" href="{{ url_for(nav.cta.endpoint) }}">{{ nav.cta.label }}</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>

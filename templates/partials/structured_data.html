@@ -1,0 +1,51 @@
+{# =============================================================================
+   templates/partials/structured_data.html
+   Global Organization JSON-LD, emitted on every page.
+
+   Reads `org` (data/organization or config):
+     .name .legal_name .url .logo .email .phone .country .address
+     .area_served (string|list) .same_as (list of profile URLs)
+
+   Page-specific schema (Product / Article / BreadcrumbList) is supplied via
+   the `structured_data` block in base.html — not here.
+   NOTE: JSON-LD is SEO structured data inside a script tag, not app JavaScript.
+   ============================================================================= #}
+{% if org %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": {{ (org.name if org.name else config.SITE_NAME) | tojson }}
+  {%- if org.legal_name %},
+  "legalName": {{ org.legal_name | tojson }}
+  {%- endif %}
+  {%- if org.url %},
+  "url": {{ org.url | tojson }}
+  {%- endif %}
+  {%- if org.logo %},
+  "logo": {{ (org.logo if '://' in org.logo else url_for('static', filename=org.logo, _external=True)) | tojson }}
+  {%- endif %}
+  {%- if org.email %},
+  "email": {{ org.email | tojson }}
+  {%- endif %}
+  {%- if org.phone %},
+  "telephone": {{ org.phone | tojson }}
+  {%- endif %}
+  {%- if org.country %},
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": {{ org.country | tojson }}
+    {%- if org.address %},
+    "streetAddress": {{ org.address | tojson }}
+    {%- endif %}
+  }
+  {%- endif %}
+  {%- if org.area_served %},
+  "areaServed": {{ org.area_served | tojson }}
+  {%- endif %}
+  {%- if org.same_as %},
+  "sameAs": {{ org.same_as | tojson }}
+  {%- endif %}
+}
+</script>
+{% endif %}

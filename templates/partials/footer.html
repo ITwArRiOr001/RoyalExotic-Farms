@@ -1,0 +1,111 @@
+{# =============================================================================
+   templates/partials/footer.html  —  REVISED (Foundation Audit corrections)
+   Site footer (contentinfo): company identity, link columns (nav.footer),
+   contact channels, certification badges, legal + registration line.
+
+   AUDIT CHANGES IN THIS FILE:
+     [CF-02] Footer heading hierarchy correction. All footer column labels
+             changed from <h2> to <p class="site-footer__heading">. Footer
+             column labels are navigation/group labels, not document section
+             headings; the HTML outline algorithm is deprecated and screen
+             readers present a flat heading list, so multiple footer <h2>s
+             polluted the document outline and competed with real page section
+             headings. Visual weight is reproduced in CSS (Phase 3C). The
+             <nav aria-label> landmark continues to name the link region.
+
+   Reads: org (identity/contact), nav.footer (columns), certifications, now_year.
+   Certification badge rendering will later delegate to the
+   certification_card(badge) macro (components/cards.html); a structural list
+   is used here so this foundation set runs before that macro exists.
+   ============================================================================= #}
+<footer class="site-footer" role="contentinfo">
+  <div class="site-footer__inner">
+
+    {# Company identity #}
+    <div class="site-footer__brand">
+      <a href="{{ url_for('main.home') }}"
+         aria-label="{{ org.name if org and org.name else config.SITE_NAME }}">
+        <img src="{{ url_for('static', filename='img/brand/logo-light.svg') }}"
+             alt="{{ org.name if org and org.name else config.SITE_NAME }}"
+             width="180" height="40">
+      </a>
+      {% if org and org.registration_line %}
+      <p class="site-footer__registration">{{ org.registration_line }}</p>
+      {% endif %}
+    </div>
+
+    {# Link columns (from data/navigation.py -> nav.footer) #}
+    {% if nav and nav.footer %}
+    <nav class="site-footer__nav" aria-label="{{ _('Footer') }}">
+      {% for col in nav.footer %}
+      <div class="site-footer__col">
+        {# [CF-02] Non-heading structural label (was <h2>) #}
+        <p class="site-footer__heading">{{ col.heading }}</p>
+        <ul class="site-footer__list">
+          {% for link in col.links %}
+          <li>
+            <a href="{{ url_for(link.endpoint) }}"
+               {% if request.endpoint == link.endpoint %}aria-current="page"{% endif %}>
+              {{ link.label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </nav>
+    {% endif %}
+
+    {# Contact channels #}
+    {% if org %}
+    <div class="site-footer__contact">
+      {# [CF-02] Non-heading structural label (was <h2>) #}
+      <p class="site-footer__heading">{{ _('Contact') }}</p>
+      <address class="site-footer__address">
+        {% if org.address %}<p>{{ org.address }}</p>{% endif %}
+        {% if org.phone %}<p><a href="tel:{{ org.phone | replace(' ', '') }}">{{ org.phone }}</a></p>{% endif %}
+        {% if org.email %}<p><a href="mailto:{{ org.email }}">{{ org.email }}</a></p>{% endif %}
+        {% if org.whatsapp_number %}
+        <p>
+          <a href="https://wa.me/{{ org.whatsapp_number }}" target="_blank" rel="noopener">{{ _('WhatsApp') }}</a>
+        </p>
+        {% endif %}
+      </address>
+    </div>
+    {% endif %}
+
+    {# Certifications & registrations (badge row; document link when attached) #}
+    {% if certifications %}
+    <section class="site-footer__certs" aria-label="{{ _('Certifications and registrations') }}">
+      {# [CF-02] Non-heading structural label (was <h2>) #}
+      <p class="site-footer__heading">{{ _('Certifications & Registrations') }}</p>
+      <ul class="site-footer__cert-list">
+        {% for cert in certifications %}
+        <li class="site-footer__cert">
+          <span class="site-footer__cert-code">{{ cert.code }}</span>
+          {% if cert.document %}
+          <a class="site-footer__cert-link"
+             href="{{ url_for('static', filename='docs/certifications/' ~ cert.document) }}"
+             target="_blank" rel="noopener"
+             aria-label="{{ _('Open document') }}: {{ cert.code }}">
+            {{ _('Open') }}
+          </a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+
+  {# Base bar: copyright + legal #}
+  <div class="site-footer__base">
+    <p class="site-footer__copyright">
+      &copy; {{ now_year }} {{ org.name if org and org.name else config.SITE_NAME }}
+    </p>
+    <ul class="site-footer__legal">
+      <li><a href="{{ url_for('main.privacy') }}">{{ _('Privacy Policy') }}</a></li>
+      <li><a href="{{ url_for('main.terms') }}">{{ _('Terms') }}</a></li>
+    </ul>
+  </div>
+</footer>

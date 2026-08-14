@@ -1,0 +1,81 @@
+{# =============================================================================
+   templates/partials/contact_actions.html  —  HARDENED (Batch 2 final pass)
+   Unified Contact Action System (Foundation Audit Finding 5).
+   Supersedes whatsapp_button.html. Included by base.html.
+
+   HARDENING CHANGE [H1] — Contact Action Registry Architecture:
+     The template NO LONGER constructs business actions. All URL building,
+     endpoint resolution, WhatsApp/mailto assembly, and the default action set
+     have been REMOVED from the template and MOVED to the application layer.
+     The template now RECEIVES already-resolved actions and RENDERS ONLY.
+       - No url_for() calls.
+       - No hardcoded endpoint names (e.g. forms.export_inquiry_page).
+       - No org-based / business-specific URL construction.
+     This removes hidden coupling: endpoint renames or blueprint restructuring
+     can no longer break this template.
+
+   REQUIRED APPLICATION-LAYER SOURCE (provide via data/contact_actions.py +
+   a context processor that injects a resolved `contact_actions` list):
+     contact_actions : ordered list of mappings, each:
+       {
+         'type'      : 'whatsapp' | 'inquiry' | 'email' | ... (style hook),
+         'label'     : translated visible label,
+         'href'      : FINAL resolved URL (endpoints already url_for()'d,
+                       locale-correct; wa.me / mailto fully built),
+         'icon'      : icon filename in static/img/icons/ (optional),
+         'primary'   : bool (optional),
+         'new_tab'   : bool (optional),
+         'aria_label': accessible name (optional; falls back to label)
+       }
+
+   Defensive rendering: items are filtered (must have href + label); strict-
+   Undefined-safe via .get(); renders NOTHING when no valid action exists.
+   Accessibility: labelled region; visible label + aria-label per action; icons
+   decorative. No-JS safe: group visible by default; toggle is enhancement only.
+   RTL-safe. No CSS / no JS.
+   ============================================================================= #}
+
+{# --- Filter to valid, renderable actions (no construction, just validation) --- #}
+{%- set ns = namespace(items=[]) -%}
+{%- if contact_actions is defined and contact_actions -%}
+  {%- for a in contact_actions -%}
+    {%- if a is mapping and a.get('href') and a.get('label') -%}
+      {%- set _ = ns.items.append(a) -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{# --- Render only when at least one valid action exists --- #}
+{%- if ns.items -%}
+<aside class="contact-actions" aria-label="{{ _('Quick contact') }}">
+  {# Collapse toggle: enhancement only. Revealed on mobile via CSS; JS manages
+     collapsed/expanded state. Default DOM is expanded => no-JS safe. #}
+  <button class="contact-actions__toggle"
+          type="button"
+          aria-expanded="true"
+          aria-controls="contact-actions-group"
+          aria-label="{{ _('Contact options') }}">
+    <span class="contact-actions__toggle-icon" aria-hidden="true"></span>
+  </button>
+
+  <ul id="contact-actions-group" class="contact-actions__group" role="list">
+    {%- for a in ns.items %}
+      {%- set _type = a.get('type', 'contact') -%}
+      {%- set _label = a.get('label') -%}
+      {%- set _href = a.get('href') -%}
+      {%- set _icon = a.get('icon') -%}
+      {%- set _primary = a.get('primary', false) -%}
+      {%- set _new_tab = a.get('new_tab', false) -%}
+      {%- set _aria = a.get('aria_label') or _label -%}
+    <li class="contact-actions__item contact-actions__item--{{ _type }}{% if _primary %} is-primary{% endif %}">
+      <a class="contact-actions__link" href="{{ _href }}"
+         {% if _new_tab %}target="_blank" rel="noopener"{% endif %}
+         aria-label="{{ _aria }}">
+        {% if _icon %}<img class="contact-actions__icon" src="{{ url_for('static', filename='img/icons/' ~ _icon) }}" alt="" aria-hidden="true" width="24" height="24">{% endif %}
+        <span class="contact-actions__label">{{ _label }}</span>
+      </a>
+    </li>
+    {%- endfor %}
+  </ul>
+</aside>
+{%- endif -%}
