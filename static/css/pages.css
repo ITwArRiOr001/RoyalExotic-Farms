@@ -1,0 +1,190 @@
+/* =============================================================================
+   pages.css  —  Page Layouts + Responsive Specifications + Surface Rhythm
+   Page-specific section styling that builds on the component layer.
+   Mobile-first (min-width queries); logical properties for RTL.
+   Validated for 320 / 375 / 768 / 1024 / 1440 / 1920 — no overflow, no clip,
+   no horizontal scroll (body has overflow-x:hidden as a final guard).
+   ============================================================================= */
+
+/* ---- Surface rhythm: deliberate white / paper alternation ----------------- */
+.site-main > section.home-why,
+.site-main > section.home-process,
+.site-main > section.home-markets,
+.site-main > section.markets-advantages,
+.site-main > section.products-quality,
+.site-main > section.partner-meaning,
+.site-main > section.partner-model,
+.site-main > section.about-values,
+.site-main > section.about-model,
+.site-main > section.process-coordinate,
+.site-main > section.insights-categories,
+.site-main > section.contact-details,
+.site-main > section.inquiry-next { background-color: var(--color-paper); }
+
+/* Shared prose width + muted tone for free-text section bodies */
+.about-model__body, .about-experience__body, .about-accountability__body, .about-legitimacy,
+.partner-model__body, .partner-reassurance__body, .markets-approach__body,
+.product-overview__body, .product-availability__body, .product-quality__body,
+.contact-response__body, .markets-current__body {
+  max-inline-size: var(--measure); color: var(--color-ink);
+}
+.contact-details__channel-note { color: var(--color-ink-muted); margin-block-start: var(--space-4); }
+
+/* ---- Home hero (restrained; video as full-bleed scrimmed background) ------ */
+.site-main > section.home-hero { padding-block: clamp(4rem, 9vw, 8rem); position: relative; overflow: hidden; isolation: isolate; }
+.home-hero > .home-hero__media { position: absolute; inset: 0; z-index: -1; max-inline-size: none; margin: 0; }
+.home-hero__video { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.home-hero > .home-hero__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 44, 34, 0.86), rgba(10, 44, 34, 0.58)); }
+.home-hero__content { position: relative; z-index: 1; }
+.home-hero .section-opener__heading { color: var(--color-white); font-size: var(--text-display); }
+.home-hero .section-opener__eyebrow { color: var(--color-gold); }
+.home-hero .section-opener__lead { color: rgba(255, 255, 255, 0.92); }
+.home-hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-block-start: var(--space-6); }
+.home-hero .btn--secondary { color: var(--color-white); border-color: rgba(255, 255, 255, 0.5); }
+@media (hover: hover) { .home-hero .btn--secondary:hover { background-color: rgba(255, 255, 255, 0.12); border-color: var(--color-white); } }
+
+/* Calm hero content load-in (JS adds .is-ready). No-JS shows content normally;
+   reduced motion reveals instantly — see accessibility.css. GPU-friendly. */
+.has-js .home-hero__content { opacity: 0; transform: translateY(12px); }
+.has-js .home-hero__content.is-ready {
+  opacity: 1; transform: none;
+  transition: opacity 600ms var(--ease-entrance), transform 600ms var(--ease-entrance);
+}
+
+/* ---- Simple text heroes (other pages): size the h1 up from h2 default ----- */
+.about-hero .section-opener__heading,
+.products-hero .section-opener__heading,
+.process-hero .section-opener__heading,
+.markets-hero .section-opener__heading,
+.partner-hero .section-opener__heading,
+.inquiry-hero .section-opener__heading,
+.contact-hero .section-opener__heading,
+.insights-hero .section-opener__heading,
+.error .section-opener__heading,
+.legal .section-opener__heading { font-size: var(--text-h1); }
+
+/* ---- Founder blocks (portrait + text) ------------------------------------ */
+.home-founder__inner, .about-founder__inner { display: grid; gap: var(--space-6); align-items: center; }
+.home-founder__portrait, .about-founder__portrait { margin: 0; }
+.home-founder__img, .about-founder__img { inline-size: 100%; aspect-ratio: 4 / 5; object-fit: cover; background-color: var(--color-mist); border-radius: var(--radius-lg); }
+.home-founder__text, .about-founder__text { display: grid; gap: var(--space-4); }
+@media (min-width: 768px) {
+  .home-founder__inner, .about-founder__inner { grid-template-columns: minmax(0, 18rem) 1fr; gap: var(--space-7); }
+}
+
+/* ---- Featured product spans wider on larger grids ------------------------- */
+@media (min-width: 768px) {
+  .home-products__grid { grid-template-columns: repeat(2, 1fr); }
+  .home-products__grid .product-card--featured { grid-column: 1 / -1; }
+}
+@media (min-width: 1024px) {
+  .home-products__grid { grid-template-columns: repeat(3, 1fr); }
+  .home-products__grid .product-card--featured { grid-column: span 2; }
+}
+
+/* ---- Product detail ------------------------------------------------------- */
+.product-hero { max-inline-size: var(--container); margin-inline: auto; display: grid; gap: var(--space-6); align-items: center; }
+.product-hero > * { max-inline-size: none; margin-inline: 0; }
+.product-hero__media { margin: 0; }
+.product-hero__img { inline-size: 100%; aspect-ratio: 16 / 9; object-fit: cover; background-color: var(--color-mist); border-radius: var(--radius-lg); }
+.product-hero__flag { font-size: var(--text-overline); font-weight: 700; letter-spacing: var(--tracking-overline); text-transform: uppercase; color: var(--color-gold-deep); }
+.product-hero__content { display: grid; gap: var(--space-4); align-content: center; }
+@media (min-width: 1024px) { .product-hero { grid-template-columns: 1.1fr 1fr; gap: var(--space-8); } }
+
+.product-specs__list { border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; }
+.product-specs__row { display: grid; gap: var(--space-1); padding: var(--space-4) var(--space-5); border-block-end: 1px solid var(--color-line); }
+.product-specs__row:nth-child(even) { background-color: var(--color-paper); }
+.product-specs__row:last-child { border-block-end: 0; }
+.product-specs__label { font-weight: 600; color: var(--color-green-900); margin: 0; }
+.product-specs__value { color: var(--color-ink); margin: 0; }
+@media (min-width: 600px) { .product-specs__row { grid-template-columns: 16rem 1fr; gap: var(--space-4); align-items: baseline; } }
+
+.product-varieties__list, .product-packaging__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
+.product-varieties__item, .product-packaging__item { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5); background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-md); border-inline-start: 3px solid var(--color-green-600); }
+.product-varieties__name, .product-packaging__type { font-weight: 600; color: var(--color-green-800); }
+.product-varieties__note, .product-packaging__note { color: var(--color-ink-muted); font-size: var(--text-small); }
+
+/* Realism notes (direct children of <main>) */
+.products-note, .product-note {
+  max-inline-size: var(--container-prose); margin-inline: auto;
+  padding: var(--space-5) var(--space-inline);
+  color: var(--color-ink-muted); font-size: var(--text-small);
+}
+.products-note, .product-note { display: block; }
+@supports (border-inline-start: 3px solid) {
+  .products-note, .product-note { border-inline-start: 3px solid var(--color-gold); background-color: var(--color-paper); border-radius: var(--radius-sm); max-inline-size: var(--measure); }
+}
+
+/* ---- Markets -------------------------------------------------------------- */
+.markets-map__img { inline-size: 100%; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background-color: var(--color-sky-tint); }
+.markets-current__list, .markets-developing__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.markets-current__item, .markets-developing__item { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5); background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-md); border-inline-start: 3px solid var(--color-green-600); }
+.markets-developing__item { border-inline-start-color: var(--color-sky); }
+.markets-current__name, .markets-developing__name { font-weight: 600; color: var(--color-green-800); }
+.markets-current__note, .markets-developing__note { color: var(--color-ink-muted); font-size: var(--text-small); }
+
+/* ---- Import partner audience list ---------------------------------------- */
+.partner-audience__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.partner-audience__list li { padding: var(--space-3) var(--space-4); background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-md); font-weight: 600; color: var(--color-green-800); }
+
+/* ---- Insights ------------------------------------------------------------- */
+.insights-featured__item { max-inline-size: 100%; }
+@media (min-width: 768px) {
+  .article-card--featured { display: grid; grid-template-columns: 1.2fr 1fr; align-items: stretch; }
+  .article-card--featured .article-card__media { block-size: 100%; aspect-ratio: auto; }
+}
+.insights-categories__list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.insights-categories__item a, .insights-categories__item span {
+  display: inline-block; padding: var(--space-2) var(--space-4);
+  background-color: var(--color-white); border: 1px solid var(--color-line-strong);
+  border-radius: 999px; text-decoration: none; color: var(--color-green-800); font-size: var(--text-small); font-weight: 600;
+}
+.insights-categories__item a:hover { border-color: var(--color-gold); color: var(--color-gold-deep); }
+
+/* ---- Article -------------------------------------------------------------- */
+.article { max-inline-size: var(--container); margin-inline: auto; padding-block: var(--space-section); padding-inline: var(--space-inline); }
+.article__header { max-inline-size: var(--container-prose); margin-inline: auto; margin-block-end: var(--space-6); }
+.article__category { font-size: var(--text-overline); font-weight: 700; letter-spacing: var(--tracking-overline); text-transform: uppercase; color: var(--color-gold-deep); }
+.article__title { font-size: var(--text-h1); margin-block: var(--space-3); }
+.article__meta { display: flex; flex-wrap: wrap; gap: var(--space-3); color: var(--color-ink-muted); font-size: var(--text-small); }
+.article__hero { margin-block-end: var(--space-7); }
+.article__hero-img { inline-size: 100%; border-radius: var(--radius-lg); }
+.article__body > * + * { margin-block-start: var(--space-4); }
+.article__body h2 { font-size: var(--text-h2); margin-block-start: var(--space-7); }
+.article__body h3 { font-size: var(--text-h3); margin-block-start: var(--space-6); }
+.article__body ul, .article__body ol { padding-inline-start: var(--space-6); display: grid; gap: var(--space-2); }
+.article__body blockquote { border-inline-start: 3px solid var(--color-gold); padding-inline-start: var(--space-4); color: var(--color-ink-muted); font-style: italic; }
+.article__body a { color: var(--color-green-700); text-decoration: underline; }
+.article__body img { border-radius: var(--radius-md); margin-block: var(--space-5); }
+/* In-article inline CTA renders as a contained panel (not full-bleed) */
+.article .cta-band { border-radius: var(--radius-lg); padding: var(--space-6); margin-block-start: var(--space-7); }
+.article .cta-band__inner { max-inline-size: none; }
+
+/* ---- Contact details ------------------------------------------------------ */
+.contact-details__address { font-style: normal; display: grid; gap: var(--space-3); max-inline-size: var(--measure); }
+.contact-details__line { margin: 0; }
+.contact-details__use { color: var(--color-ink-muted); font-size: var(--text-small); }
+
+/* ---- Home: optional social proof / profile ------------------------------- */
+.home-markets__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.home-markets__market { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5); background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-md); border-inline-start: 3px solid var(--color-green-600); }
+.home-markets__market-name { font-weight: 600; color: var(--color-green-800); }
+.home-markets__market-tag { font-size: var(--text-small); color: var(--color-ink-muted); }
+.home-markets__media img { inline-size: 100%; border-radius: var(--radius-lg); background-color: var(--color-sky-tint); }
+.home-testimonials__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.home-testimonials__figure { margin: 0; padding: var(--space-6); background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-lg); border-block-start: 3px solid var(--color-gold); display: grid; gap: var(--space-3); }
+.home-testimonials__quote { font-family: var(--font-display); font-size: var(--text-h4); color: var(--color-green-800); margin: 0; }
+.home-testimonials__author { font-weight: 600; color: var(--color-ink); }
+.home-testimonials__role { color: var(--color-ink-muted); font-size: var(--text-small); }
+.home-profile__action { margin-block-start: var(--space-5); }
+
+/* =============================================================================
+   Phase 4C — Insight article link polish (extends; CSS only)
+   Hairline underline that warms to gold on hover/focus — a refined reading
+   detail, not decoration. currentColor stays green-700 for AA contrast. */
+.article__body a {
+  text-decoration-color: var(--color-line-strong);
+  transition: text-decoration-color var(--dur-micro) var(--ease-standard),
+              color var(--dur-micro) var(--ease-standard);
+}
+.article__body a:hover, .article__body a:focus-visible { text-decoration-color: var(--color-gold); }

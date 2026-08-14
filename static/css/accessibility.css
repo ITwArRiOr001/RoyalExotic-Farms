@@ -1,0 +1,74 @@
+/* =============================================================================
+   accessibility.css  —  Accessibility Specifications
+   Cross-cutting a11y hardening. The primitives (visible focus ring, reduced
+   motion, skip link, 16px type floor, text-based errors, 44px targets) live in
+   base.css / components.css; this file adds environment-adaptive safeguards.
+   Accessibility is treated as a business requirement, not an enhancement.
+   ============================================================================= */
+
+/* Higher-contrast preference: strengthen hairlines and muted text. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-line: #B9C2BC;
+    --color-line-strong: #8FA199;
+    --color-ink-muted: #45524D;
+  }
+  .btn--secondary { border-color: var(--color-green-700); }
+  .form-field__input, .form-field__textarea, .form-field__select { border-color: var(--color-green-700); }
+}
+
+/* Windows High Contrast / forced-colors: keep structure and focus legible. */
+@media (forced-colors: active) {
+  .btn,
+  .product-card, .value-card, .article-card, .certification-card,
+  .home-process__step, .process-steps__step, .partner-process__step, .inquiry-next__step,
+  .form-field__input, .form-field__textarea, .form-field__select { border: 1px solid; }
+  :focus-visible { outline: 2px solid; outline-offset: 2px; }
+  /* The video scrim is non-essential in forced colors; ensure hero text stays
+     on a solid system surface rather than relying on the gradient. */
+  .home-hero > .home-hero__media::after { background: Canvas; opacity: 1; }
+  .home-hero .section-opener__heading,
+  .home-hero .section-opener__lead { color: CanvasText; }
+}
+
+/* Guarantee comfortable hit targets for inline text links in dense regions. */
+.site-footer a, .primary-nav__sublink, .insights-categories__item a,
+.certification-card__action, .site-footer__cert-link { display: inline-block; padding-block: 0.15rem; }
+
+/* Keep focus visible on coloured/dark surfaces (gold ring sits on the offset). */
+.cta-band--dark :focus-visible,
+.site-footer :focus-visible,
+.mobile-nav-dialog :focus-visible { outline-color: var(--color-gold); }
+
+/* -----------------------------------------------------------------------------
+   Phase 4B — motion safeguards
+   base.css already zeroes transition/animation *durations* under reduced motion;
+   these rules additionally neutralise the *target* transforms so nothing rests
+   in a shifted or hidden state, and drop decorative flourishes in forced colors.
+   ----------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .has-js .home-hero__content,
+  .has-js .home-hero__content.is-ready { opacity: 1 !important; transform: none !important; }
+  .product-card__img, .article-card__img { transform: none !important; }
+  .btn--primary::after, .btn--on-dark::after { display: none !important; }
+  .btn:hover, .product-card:hover, .article-card:hover,
+  .contact-actions__link:hover { transform: none !important; }
+}
+@media (forced-colors: active) {
+  /* The gold sweep is purely decorative and has no meaning in forced colors. */
+  .btn--primary::after, .btn--on-dark::after { display: none; }
+}
+
+/* -----------------------------------------------------------------------------
+   Phase 4C — safeguards for progressive media, reading progress, contact settle
+   ----------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .has-js .media-fade,
+  .has-js .media-fade.is-loaded { opacity: 1 !important; transition: none !important; }
+  .has-js .contact-actions,
+  .has-js .contact-actions.is-ready { opacity: 1 !important; transform: none !important; }
+  .reading-progress { transition: none !important; } /* positional feedback, not animated */
+}
+@media (forced-colors: active) {
+  .reading-progress { background-color: Highlight; }
+}
