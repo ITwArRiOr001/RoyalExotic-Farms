@@ -1,0 +1,58 @@
+{# =============================================================================
+   templates/components/cta_band.html
+   Conversion band macro (component matrix: cta_band).
+
+   Usage:
+     {% from 'components/cta_band.html' import cta_band %}
+     {{ cta_band(
+          heading=_('...'),
+          text=_('...'),
+          primary={'label': _('Export Inquiry'), 'endpoint': 'forms.export_inquiry_page'},
+          secondary={'label': _('Become an Import Partner'), 'endpoint': 'forms.import_partner_page'},
+          theme='dark',
+          heading_id='home-closing-cta') }}
+
+   Params:
+     heading      : band heading
+     text         : supporting line
+     primary      : dict -> { label, endpoint|href, variant?, new_tab? }
+     secondary    : dict -> same shape
+     theme        : light | dark   (dark => green-900 anchor band)
+     heading_level: default h2
+     heading_id   : id used for the heading and the section's aria-labelledby
+
+   Renders buttons via the shared button macro. On dark theme the primary
+   action defaults to the "on-dark" variant. RTL-safe.
+   ============================================================================= #}
+{% from 'components/buttons.html' import button %}
+
+{% macro cta_band(heading=none, text=none, primary=none, secondary=none,
+                  theme='light', heading_level='h2', heading_id=none) %}
+<section class="cta-band cta-band--{{ theme }}"{% if heading_id %} aria-labelledby="{{ heading_id }}"{% endif %}>
+  <div class="cta-band__inner">
+    {% if heading %}
+    <{{ heading_level }} class="cta-band__heading"{% if heading_id %} id="{{ heading_id }}"{% endif %}>{{ heading }}</{{ heading_level }}>
+    {% endif %}
+    {% if text %}<p class="cta-band__text">{{ text }}</p>{% endif %}
+
+    {% if primary or secondary %}
+    <div class="cta-band__actions">
+      {% if primary %}
+        {{ button(primary.label,
+                  href=primary.href,
+                  endpoint=primary.endpoint,
+                  variant=(primary.variant if primary.variant else ('on-dark' if theme == 'dark' else 'primary')),
+                  new_tab=(primary.new_tab if primary.new_tab else false)) }}
+      {% endif %}
+      {% if secondary %}
+        {{ button(secondary.label,
+                  href=secondary.href,
+                  endpoint=secondary.endpoint,
+                  variant=(secondary.variant if secondary.variant else 'secondary'),
+                  new_tab=(secondary.new_tab if secondary.new_tab else false)) }}
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endmacro %}

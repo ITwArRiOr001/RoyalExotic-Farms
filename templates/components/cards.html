@@ -1,0 +1,164 @@
+{# =============================================================================
+   templates/components/cards.html  —  REVISED (Batch 2 refinement)
+   Reusable card macros (component matrix: cards).
+   Macros: product_card, value_card, article_card, certification_card
+
+   REFINEMENT CHANGES:
+     [R2] product_card — product imagery is CONTENT, not decoration. The image
+          is no longer a second (aria-hidden) link; it is a plain element with a
+          meaningful alt (priority: product.image_alt -> product.name ->
+          translated fallback). The TITLE LINK is the single navigable link, so
+          there is no duplicate link announcement, the alt is exposed to AT, and
+          SEO value is retained. Full-card clickability is achieved in CSS via a
+          stretched-link (title-link ::after), not a second DOM link.
+     [R3] article_card — intentionally RETAINS the decorative pattern
+          (aria-hidden media link + alt="") because the image adds nothing
+          beyond the title; documented below so it is not "fixed" into a
+          duplicate announcement.
+     [R4] product_card & article_card — new `eager` param for above-the-fold
+          media (homepage flagship banana, featured article): eager=True ->
+          loading="eager" fetchpriority="high"; else loading="lazy"
+          decoding="async".
+     [R5] certification_card — `download` behaviour retained; browser-limitation
+          documentation added.
+
+   Cards consume DATA OBJECTS (never loose values) so content additions are
+   template-free (Architecture Lock §1, §4–5). `heading_level` keeps the page
+   document outline correct (section <h2> -> cards <h3>). Media is ratio-locked
+   with explicit width/height (CLS prevention). RTL-safe markup.
+   ============================================================================= #}
+
+{# ---------------------------------------------------------------------------
+   product_card(product, featured, heading_level, eager)
+   product: { slug, name, summary, featured, media:{card}, image_alt }
+
+   [R2] Image is CONTENT: meaningful alt, NOT a link. Single link = the title.
+        Make the whole card clickable in CSS by stretching .product-card__title-link
+        (position relative on .product-card, ::after inset:0 on the link).
+   [R4] eager=True for an above-the-fold card (e.g. homepage flagship banana).
+   --------------------------------------------------------------------------- #}
+{% macro product_card(product, featured=false, heading_level='h3', eager=false) %}
+{%- set _alt = product.image_alt if (product.image_alt is defined and product.image_alt) else (product.name if product.name else _('Product image')) -%}
+<article class="product-card{% if featured %} product-card--featured{% endif %}">
+  <span class="product-card__media">
+    <img class="product-card__img"
+         src="{{ url_for('static', filename=(product.media.card if product.media and product.media.card else 'img/placeholders/product-4x3.svg')) }}"
+         alt="{{ _alt }}"
+         width="600" height="450"
+         {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+  </span>
+  <div class="product-card__body">
+    {% if featured %}<p class="product-card__flag">{{ _('Flagship') }}</p>{% endif %}
+    <{{ heading_level }} class="product-card__title">
+      {# Single navigable link; CSS stretched-link makes the whole card clickable #}
+      <a class="product-card__title-link" href="{{ url_for('products.detail', slug=product.slug) }}">{{ product.name }}</a>
+    </{{ heading_level }}>
+    {% if product.summary %}<p class="product-card__summary">{{ product.summary }}</p>{% endif %}
+  </div>
+</article>
+{% endmacro %}
+
+{# ---------------------------------------------------------------------------
+   value_card(title, body, icon, heading_level)
+   For "Why us" / value-pillar grids. icon is decorative.
+   --------------------------------------------------------------------------- #}
+{% macro value_card(title, body=none, icon=none, heading_level='h3') %}
+<article class="value-card">
+  {% if icon %}
+  <span class="value-card__icon" aria-hidden="true">
+    <img src="{{ url_for('static', filename='img/icons/' ~ icon) }}" alt="" width="40" height="40">
+  </span>
+  {% endif %}
+  <{{ heading_level }} class="value-card__title">{{ title }}</{{ heading_level }}>
+  {% if body %}<p class="value-card__body">{{ body }}</p>{% endif %}
+</article>
+{% endmacro %}
+
+{# ---------------------------------------------------------------------------
+   article_card(article, featured, heading_level, eager)
+   article: { slug, title, description, category, date, date_display, thumbnail }
+
+   [R3] ACCESSIBILITY DECISION — DO NOT CHANGE WITHOUT REVIEW:
+        The thumbnail is presentational here; it repeats the title and adds no
+        new information. Therefore:
+          - the media link is aria-hidden + tabindex="-1" (removed from the AT
+            tree and tab order), and
+          - the image uses alt="" (decorative).
+        The TITLE LINK immediately follows and is the single link announced to
+        assistive technology. Giving the image a meaningful alt OR exposing the
+        media link would create a DUPLICATE link/announcement to the same
+        destination. Keep alt="" and the hidden media link.
+   [R4] eager=True for a featured/above-the-fold article card.
+   --------------------------------------------------------------------------- #}
+{% macro article_card(article, featured=false, heading_level='h3', eager=false) %}
+<article class="article-card{% if featured %} article-card--featured{% endif %}">
+  {# [R3] Decorative media link: hidden from AT to avoid duplicate link to the
+     same destination as the title link below. #}
+  <a class="article-card__media-link"
+     href="{{ url_for('insights.article', slug=article.slug) }}"
+     tabindex="-1" aria-hidden="true">
+    <span class="article-card__media">
+      <img class="article-card__img"
+           src="{{ url_for('static', filename=(article.thumbnail if article.thumbnail else 'img/placeholders/article-16x9.svg')) }}"
+           alt=""
+           width="640" height="360"
+           {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+    </span>
+  </a>
+  <div class="article-card__body">
+    <p class="article-card__meta">
+      {% if article.category %}<span class="article-card__category">{{ article.category }}</span>{% endif %}
+      {% if article.date %}<time class="article-card__date" datetime="{{ article.date }}">{{ article.date_display if article.date_display else article.date }}</time>{% endif %}
+    </p>
+    <{{ heading_level }} class="article-card__title">
+      <a class="article-card__title-link" href="{{ url_for('insights.article', slug=article.slug) }}">{{ article.title }}</a>
+    </{{ heading_level }}>
+    {% if article.description %}<p class="article-card__excerpt">{{ article.description }}</p>{% endif %}
+  </div>
+</article>
+{% endmacro %}
+
+{# ---------------------------------------------------------------------------
+   certification_card(cert, mode, heading_level)
+   cert: { code, label, status, document (nullable), badge }
+   mode: "full" (home/about sections) | "badge" (compact, e.g. footer).
+
+   [R5] DOWNLOAD ATTRIBUTE — behaviour & browser limitations (retained as-is):
+        - The certificate PDFs are served from our OWN /static (same-origin),
+          so the `download` attribute reliably triggers a file download.
+        - `download` is honoured only for SAME-ORIGIN resources; if a document
+          URL is ever cross-origin, browsers ignore `download` and OPEN the file
+          instead (this is a browser security policy, not a bug).
+        - Older/unsupported browsers ignore `download` and simply NAVIGATE to
+          the PDF (open) — a safe, acceptable fallback.
+        Open + Download render ONLY when cert.document is set; otherwise a
+        non-interactive "Document coming soon" state shows — no broken links
+        (Architecture Lock §5).
+   --------------------------------------------------------------------------- #}
+{% macro certification_card(cert, mode='full', heading_level='h3') %}
+<article class="certification-card certification-card--{{ mode }}">
+  <span class="certification-card__badge" aria-hidden="true">
+    <img src="{{ url_for('static', filename=(cert.badge if cert.badge else 'img/placeholders/cert-badge.svg')) }}" alt="" width="64" height="64">
+  </span>
+  <div class="certification-card__body">
+    <{{ heading_level }} class="certification-card__code">{{ cert.code }}</{{ heading_level }}>
+    {% if cert.label and mode == 'full' %}<p class="certification-card__label">{{ cert.label }}</p>{% endif %}
+    {% if cert.status %}<p class="certification-card__status">{{ cert.status }}</p>{% endif %}
+
+    <div class="certification-card__actions">
+      {% if cert.document %}
+        {%- set _doc = url_for('static', filename='docs/certifications/' ~ cert.document) -%}
+        <a class="certification-card__action certification-card__action--open"
+           href="{{ _doc }}" target="_blank" rel="noopener"
+           aria-label="{{ _('Open document') }}: {{ cert.code }}">{{ _('Open') }}</a>
+        {# [R5] same-origin /static => download honoured; cross-origin/legacy => opens #}
+        <a class="certification-card__action certification-card__action--download"
+           href="{{ _doc }}" download
+           aria-label="{{ _('Download document') }}: {{ cert.code }}">{{ _('Download') }}</a>
+      {% else %}
+        <span class="certification-card__action certification-card__action--pending" aria-disabled="true">{{ _('Document coming soon') }}</span>
+      {% endif %}
+    </div>
+  </div>
+</article>
+{% endmacro %}

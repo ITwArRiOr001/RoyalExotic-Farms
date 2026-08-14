@@ -1,0 +1,50 @@
+{# =============================================================================
+   templates/components/buttons.html
+   Reusable button / link macro (component matrix: buttons).
+
+   Usage:
+     {% from 'components/buttons.html' import button %}
+     {{ button(_('Export Inquiry'), endpoint='forms.export_inquiry_page') }}
+     {{ button('WhatsApp', href=wa_url, variant='secondary', new_tab=True, icon='whatsapp.svg') }}
+     {{ button(_('Submit'), type='submit') }}   {# no href/endpoint -> <button> #}
+
+   Params:
+     label       : visible text (already translated by caller)
+     href        : explicit URL (external/absolute) — optional
+     endpoint    : Flask endpoint for url_for() — optional (takes precedence)
+     variant     : primary | secondary | tertiary | on-dark
+     size        : sm | md | lg
+     full_width  : bool -> btn--block
+     icon        : icon filename in static/img/icons/ — optional, decorative
+     type        : button type when rendered as <button> (button|submit)
+     new_tab     : bool -> target=_blank rel=noopener (links only)
+     aria_label  : optional override for accessible name
+     aria_current: optional (e.g. "page")
+     id          : optional element id
+
+   Notes: icon is decorative (alt="" aria-hidden); the label carries meaning.
+   Direction-agnostic markup — RTL-safe. No CSS/JS here.
+   ============================================================================= #}
+{% macro button(label, href=none, endpoint=none, variant='primary', size='md',
+                full_width=false, icon=none, type='button', new_tab=false,
+                aria_label=none, aria_current=none, id=none) %}
+  {%- set classes = 'btn btn--' ~ variant ~ ' btn--' ~ size ~ (' btn--block' if full_width else '') -%}
+  {%- set target = url_for(endpoint) if endpoint else href -%}
+  {%- if target -%}
+  <a class="{{ classes }}" href="{{ target }}"
+     {% if id %}id="{{ id }}"{% endif %}
+     {% if new_tab %}target="_blank" rel="noopener"{% endif %}
+     {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}
+     {% if aria_current %}aria-current="{{ aria_current }}"{% endif %}>
+    {%- if icon %}<img class="btn__icon" src="{{ url_for('static', filename='img/icons/' ~ icon) }}" alt="" aria-hidden="true" width="20" height="20">{% endif -%}
+    <span class="btn__label">{{ label }}</span>
+  </a>
+  {%- else -%}
+  <button class="{{ classes }}" type="{{ type }}"
+          {% if id %}id="{{ id }}"{% endif %}
+          {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}>
+    {%- if icon %}<img class="btn__icon" src="{{ url_for('static', filename='img/icons/' ~ icon) }}" alt="" aria-hidden="true" width="20" height="20">{% endif -%}
+    <span class="btn__label">{{ label }}</span>
+  </button>
+  {%- endif -%}
+{% endmacro %}
