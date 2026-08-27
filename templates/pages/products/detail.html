@@ -1,0 +1,226 @@
+{# =============================================================================
+   templates/pages/products/detail.html
+   Single, data-driven product detail (specification) page for ALL products.
+   Extends base.html; consumes ONLY approved Batch 2 components. No new
+   components, no CSS, no JS. NOT an ecommerce page: no cart, no pricing.
+
+   Locked section order (Architecture Lock, product detail):
+     Hero -> Overview -> Varieties/grades -> Specs -> Packaging -> Availability
+     -> Quality/handling -> Export-process relationship -> Reasons -> CTA.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, product
+     optional: contact_actions (global), whatsapp_message
+
+   product (data/products.py): slug, name, featured, summary, overview,
+     varieties[{name,note}], specs[{label,value}], packaging[{type,note}],
+     availability, quality_notes, media{hero}, image_alt, category, seo.
+
+   Defensive: optional fields guarded with `is defined` (StrictUndefined-safe).
+   Honest: specifications are indicative and confirmed per order; no fabricated
+   data is introduced by this template.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-product-detail{% endblock %}
+
+{# Resolve hero media + alt once (placeholder fallback; never a broken image) #}
+{% set _media = product.media if (product.media is defined and product.media) else none %}
+{% set _hero = (_media.hero if (_media and _media.hero is defined and _media.hero) else 'img/placeholders/product-16x9.svg') %}
+{% set _hero_alt = product.image_alt if (product.image_alt is defined and product.image_alt) else product.name %}
+{% set _inquiry_url = url_for('forms.export_inquiry_page', product=product.slug) %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.name | tojson }}
+  {%- if product.summary is defined and product.summary %},
+  "description": {{ product.summary | tojson }}
+  {%- endif %},
+  "category": {{ (product.category if (product.category is defined and product.category) else _("Agricultural export")) | tojson }},
+  "image": {{ url_for('static', filename=_hero, _external=True) | tojson }},
+  "brand": { "@type": "Organization", "name": {{ (org.name if org and org.name else config.SITE_NAME) | tojson }} }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Products") | tojson }}, "item": {{ url_for('products.index', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 3, "name": {{ product.name | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="product-hero" aria-labelledby="product-hero-title">
+  <div class="product-hero__media">
+    <img class="product-hero__img"
+         src="{{ url_for('static', filename=_hero) }}"
+         alt="{{ _hero_alt }}"
+         width="1280" height="720"
+         loading="eager" fetchpriority="high">
+  </div>
+  <div class="product-hero__content">
+    {% if product.featured is defined and product.featured %}
+    <p class="product-hero__flag">{{ _("Flagship product") }}</p>
+    {% endif %}
+    {{ section_opener(
+        eyebrow=_("Export Product"),
+        heading=product.name,
+        lead=(product.summary if (product.summary is defined and product.summary) else none),
+        heading_level='h1',
+        heading_id='product-hero-title') }}
+    <div class="product-hero__actions">
+      {{ button(_("Request export inquiry"), href=_inquiry_url, variant='primary', size='lg') }}
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------------------ OVERVIEW ---- #}
+{% if product.overview is defined and product.overview %}
+<section class="product-overview" aria-labelledby="product-overview-title">
+  {{ section_opener(
+      eyebrow=_("Overview"),
+      heading=_("About this product"),
+      heading_level='h2',
+      heading_id='product-overview-title') }}
+  <div class="product-overview__body">
+    <p>{{ product.overview }}</p>
+  </div>
+</section>
+{% endif %}
+
+{# ----------------------------------------------------- VARIETIES/GRADES --- #}
+{% if product.varieties is defined and product.varieties %}
+<section class="product-varieties" aria-labelledby="product-varieties-title">
+  {{ section_opener(
+      eyebrow=_("Varieties & Grades"),
+      heading=_("Varieties and grades"),
+      heading_level='h2',
+      heading_id='product-varieties-title') }}
+  <ul class="product-varieties__list" role="list">
+    {% for v in product.varieties %}
+    <li class="product-varieties__item">
+      <span class="product-varieties__name">{{ v.name }}</span>
+      {% if v.note is defined and v.note %}<span class="product-varieties__note">{{ v.note }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# ------------------------------------------------------ SPECIFICATIONS ---- #}
+{% if product.specs is defined and product.specs %}
+<section class="product-specs" aria-labelledby="product-specs-title">
+  {{ section_opener(
+      eyebrow=_("Specifications"),
+      heading=_("Product specifications"),
+      lead=_("These specifications are indicative. Final specifications are confirmed per order and destination market."),
+      heading_level='h2',
+      heading_id='product-specs-title') }}
+  <dl class="product-specs__list">
+    {% for spec in product.specs %}
+    <div class="product-specs__row">
+      <dt class="product-specs__label">{{ spec.label }}</dt>
+      <dd class="product-specs__value">{{ spec.value }}</dd>
+    </div>
+    {% endfor %}
+  </dl>
+</section>
+{% endif %}
+
+{# ----------------------------------------------------------- PACKAGING ---- #}
+{% if product.packaging is defined and product.packaging %}
+<section class="product-packaging" aria-labelledby="product-packaging-title">
+  {{ section_opener(
+      eyebrow=_("Packaging"),
+      heading=_("Typical packaging options"),
+      heading_level='h2',
+      heading_id='product-packaging-title') }}
+  <ul class="product-packaging__list" role="list">
+    {% for pack in product.packaging %}
+    <li class="product-packaging__item">
+      <span class="product-packaging__type">{{ pack.type }}</span>
+      {% if pack.note is defined and pack.note %}<span class="product-packaging__note">{{ pack.note }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# ------------------------------------------------------- AVAILABILITY ----- #}
+{% if product.availability is defined and product.availability %}
+<section class="product-availability" aria-labelledby="product-availability-title">
+  {{ section_opener(
+      eyebrow=_("Availability"),
+      heading=_("Seasonal considerations"),
+      heading_level='h2',
+      heading_id='product-availability-title') }}
+  <div class="product-availability__body">
+    <p>{{ product.availability }}</p>
+  </div>
+</section>
+{% endif %}
+
+{# --------------------------------------------------- QUALITY & HANDLING --- #}
+{% if product.quality_notes is defined and product.quality_notes %}
+<section class="product-quality" aria-labelledby="product-quality-title">
+  {{ section_opener(
+      eyebrow=_("Quality & Handling"),
+      heading=_("Quality and handling"),
+      heading_level='h2',
+      heading_id='product-quality-title') }}
+  <div class="product-quality__body">
+    <p>{{ product.quality_notes }}</p>
+  </div>
+</section>
+{% endif %}
+
+{# ------------------------------------------- EXPORT PROCESS RELATIONSHIP -- #}
+<section class="product-process" aria-labelledby="product-process-title">
+  {{ section_opener(
+      eyebrow=_("How We Export"),
+      heading=_("Handled through our export process"),
+      lead=_("Every order for this product follows our documented export process — sourcing, quality coordination, documentation, and delivery."),
+      heading_level='h2',
+      heading_id='product-process-title') }}
+  <p class="product-process__more">
+    {{ button(_("See our full export process"), endpoint='main.export_process', variant='tertiary') }}
+  </p>
+</section>
+
+{# Procurement realism / export-suitability note #}
+<p class="product-note">{{ _("Export specifications and suitability can vary by season and destination market. Please contact us to confirm current suitability for your market.") }}</p>
+
+{# ------------------------------------------------ REASONS (TRACK RECORD) -- #}
+{% set proof_items = [
+  {'label': _("Sourced through established supplier networks"), 'icon': 'network.svg'},
+  {'label': _("Exporting to the Gulf — including Oman & Abu Dhabi"), 'icon': 'route.svg'},
+  {'label': _("Export documentation handled"), 'icon': 'document.svg'}
+] %}
+{% set trust_strip_label = _("Why source this product with us") %}
+{% include 'partials/trust_strip.html' %}
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Request details on this product"),
+    text=_("Send an export inquiry with your requirements and destination market, and we will respond promptly."),
+    primary={'label': _("Request export inquiry"), 'href': _inquiry_url},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='product-cta-title') }}
+
+{% endblock %}
