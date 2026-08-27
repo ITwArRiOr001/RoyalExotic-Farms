@@ -1,0 +1,73 @@
+{# =============================================================================
+   templates/pages/terms.html
+   Terms — website usage, inquiry and accuracy disclaimers, no overreach.
+   Extends base.html; consumes ONLY approved Batch 2 components. No new
+   components, no CSS, no JS.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo
+     optional: legal_updated (display date string)
+
+   NOTE FOR THE BUSINESS: honest, plain-language boilerplate. Have it reviewed
+   by qualified counsel and adapted to the company's jurisdiction before launch.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/section_opener.html' import section_opener %}
+
+{% block body_class %}page-legal page-terms{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Terms") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="legal" aria-labelledby="terms-title">
+  {{ section_opener(
+      eyebrow=_("Terms"),
+      heading=_("Terms of Use"),
+      heading_level='h1',
+      heading_id='terms-title') }}
+
+  {% if legal_updated is defined and legal_updated %}
+  <p class="legal__updated">{{ _("Last updated: %(date)s", date=legal_updated) }}</p>
+  {% endif %}
+
+  <div class="legal__body">
+    <h2 class="legal__heading">{{ _("Using this website") }}</h2>
+    <p>{{ _("By using this website, you agree to use it lawfully and not to disrupt or misuse it.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Information accuracy") }}</h2>
+    <p>{{ _("We aim to keep the information on this website accurate and current. Product specifications, packaging, and availability are indicative and are confirmed per order and destination market. They may change without notice.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Inquiries are not binding offers") }}</h2>
+    <p>{{ _("Submitting an inquiry or partnership request does not create a binding contract. Any order proceeds only on terms agreed in writing between you and Royal Exotic Farms.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Intellectual property") }}</h2>
+    <p>{{ _("The content on this website, including text and images, belongs to Royal Exotic Farms unless stated otherwise, and may not be reused without permission.") }}</p>
+
+    <h2 class="legal__heading">{{ _("External links") }}</h2>
+    <p>{{ _("This website may link to other sites. We are not responsible for the content of websites we do not operate.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Limitation") }}</h2>
+    <p>{{ _("This website is provided as-is for information. To the extent permitted by law, we are not liable for losses arising from reliance on the website alone, separate from agreed order terms.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Changes") }}</h2>
+    <p>{{ _("We may update these terms from time to time. Continued use of the website means you accept the current version.") }}</p>
+
+    <h2 class="legal__heading">{{ _("Contact") }}</h2>
+    <p>
+      {% if org and org.email %}{{ _("Questions about these terms? Email us at") }} <a href="mailto:{{ org.email }}">{{ org.email }}</a>.{% else %}{{ _("Questions about these terms? Please use the details on our contact page.") }}{% endif %}
+    </p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,159 @@
+{# =============================================================================
+   templates/pages/contact.html
+   Contact — verifiable identity, channels, contact form (consultation surfaced
+   as an enquiry type), and response commitment. Extends base.html; consumes
+   ONLY approved Batch 2 components. No new components, no CSS, no JS.
+
+   Locked section order (Architecture Lock, contact):
+     Hero -> Contact details -> Form -> Map -> Quick links -> Response commitment.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, form (ContactForm)
+     optional: contact_actions (global), whatsapp_message
+     org optional: hours, timezone, response_time
+
+   ContactForm fields expected: name, company, email, phone, country,
+     enquiry_type, message, consent.
+
+   Accessibility & accountability; no urgency or sales pressure.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/forms.html' import form_field, form_textarea, form_select, form_consent, honeypot, field_errors %}
+
+{% block body_class %}page-contact{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Contact") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% set _enquiry_options = [
+  {'value': 'general', 'label': _("General inquiry")},
+  {'value': 'consultation', 'label': _("Consultation request")},
+  {'value': 'documents', 'label': _("Documents / compliance")},
+  {'value': 'other', 'label': _("Other")}
+] %}
+{% set ns = namespace(errs=[]) %}
+{% if form and form.errors %}{% for _f, _e in form.errors.items() %}{% for _m in _e %}{% set _ = ns.errs.append(_m) %}{% endfor %}{% endfor %}{% endif %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="contact-hero" aria-labelledby="contact-hero-title">
+  {{ section_opener(
+      eyebrow=_("Contact"),
+      heading=_("Contact Royal Exotic Farms"),
+      lead=_("Reach us through whichever channel suits you. A real person will respond."),
+      heading_level='h1',
+      heading_id='contact-hero-title') }}
+</section>
+
+{# ------------------------------------------------------- CONTACT DETAILS -- #}
+<section class="contact-details" aria-labelledby="contact-details-title">
+  {{ section_opener(
+      eyebrow=_("How to Reach Us"),
+      heading=_("Contact details and channels"),
+      heading_level='h2',
+      heading_id='contact-details-title') }}
+  {% if org %}
+  <address class="contact-details__address">
+    {% if org.address %}<p class="contact-details__line">{{ org.address }}</p>{% endif %}
+    {% if org.phone %}<p class="contact-details__line"><a href="tel:{{ org.phone | replace(' ', '') }}">{{ org.phone }}</a> — <span class="contact-details__use">{{ _("calls during business hours") }}</span></p>{% endif %}
+    {% if org.whatsapp_number %}<p class="contact-details__line"><a href="https://wa.me/{{ org.whatsapp_number }}" target="_blank" rel="noopener">{{ _("WhatsApp") }}</a> — <span class="contact-details__use">{{ _("quick questions and fast replies") }}</span></p>{% endif %}
+    {% if org.email %}<p class="contact-details__line"><a href="mailto:{{ org.email }}">{{ org.email }}</a> — <span class="contact-details__use">{{ _("documents and formal correspondence") }}</span></p>{% endif %}
+    {% if org.hours is defined and org.hours %}<p class="contact-details__line">{{ org.hours }}{% if org.timezone is defined and org.timezone %} ({{ org.timezone }}){% endif %}</p>{% endif %}
+  </address>
+  {% endif %}
+  <p class="contact-details__channel-note">{{ _("For a product or pricing request, an export inquiry is the fastest route.") }}</p>
+</section>
+
+{# ------------------------------------------------------------------ FORM --- #}
+<section class="contact-form" aria-labelledby="contact-form-title">
+  {{ section_opener(
+      eyebrow=_("Send a Message"),
+      heading=_("Write to us"),
+      lead=_("Use this form for general inquiries or to request a consultation."),
+      heading_level='h2',
+      heading_id='contact-form-title') }}
+
+  {% if form %}
+  <form class="contact-form__form" method="post" action="{{ url_for('forms.submit_contact') }}" aria-labelledby="contact-form-title" novalidate>
+    {{ form.csrf_token }}
+    {{ honeypot() }}
+    {{ field_errors(ns.errs, title=_("Please correct the following:")) }}
+
+    {{ form_field('name', _("Full name"), required=True, value=(form.name.data or ''), error=(form.name.errors[0] if form.name.errors else none), autocomplete='name') }}
+    {{ form_field('company', _("Company (optional)"), value=(form.company.data or ''), error=(form.company.errors[0] if form.company.errors else none), autocomplete='organization') }}
+    {{ form_field('email', _("Email"), type='email', required=True, value=(form.email.data or ''), error=(form.email.errors[0] if form.email.errors else none), autocomplete='email', inputmode='email') }}
+    {{ form_field('phone', _("Phone (optional)"), type='tel', value=(form.phone.data or ''), error=(form.phone.errors[0] if form.phone.errors else none), autocomplete='tel', inputmode='tel') }}
+    {{ form_field('country', _("Country (optional)"), value=(form.country.data or ''), error=(form.country.errors[0] if form.country.errors else none), autocomplete='country-name') }}
+    {{ form_select('enquiry_type', _("What is this about?"), options=_enquiry_options, selected=(form.enquiry_type.data or ''), required=True, placeholder=_("Select a topic"), error=(form.enquiry_type.errors[0] if form.enquiry_type.errors else none)) }}
+    {{ form_textarea('message', _("Your message"), required=True, value=(form.message.data or ''), error=(form.message.errors[0] if form.message.errors else none), rows=5) }}
+    {{ form_consent('consent', _("I agree to be contacted in response to my message."), required=True, checked=form.consent.data, error=(form.consent.errors[0] if form.consent.errors else none)) }}
+
+    <div class="contact-form__actions">
+      {{ button(_("Send message"), type='submit', variant='primary', size='lg', full_width=True) }}
+    </div>
+  </form>
+  {% else %}
+  <div class="contact-form__fallback">
+    <p>{{ _("The contact form is currently unavailable. Please use the details above to reach us directly.") }}</p>
+  </div>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------------- MAP --- #}
+<section class="contact-map" aria-labelledby="contact-map-title">
+  {{ section_opener(
+      eyebrow=_("Location"),
+      heading=_("Where we are based"),
+      heading_level='h2',
+      heading_id='contact-map-title') }}
+  <div class="contact-map__media">
+    <img class="contact-map__img"
+         src="{{ url_for('static', filename='img/markets/office-location.svg') }}"
+         alt="{{ _('Map showing the location of Royal Exotic Farms') }}"
+         width="960" height="540" loading="lazy" decoding="async">
+  </div>
+</section>
+
+{# ----------------------------------------------------------- QUICK LINKS --- #}
+<section class="contact-quick" aria-labelledby="contact-quick-title">
+  {{ section_opener(
+      eyebrow=_("Ready to Begin?"),
+      heading=_("Start a specific request"),
+      heading_level='h2',
+      heading_id='contact-quick-title') }}
+  <div class="contact-quick__actions">
+    {{ button(_("Export Inquiry"), endpoint='forms.export_inquiry_page', variant='primary') }}
+    {{ button(_("Become an Import Partner"), endpoint='forms.import_partner_page', variant='secondary') }}
+  </div>
+</section>
+
+{# ---------------------------------------------------- RESPONSE COMMITMENT -- #}
+<section class="contact-response" aria-labelledby="contact-response-title">
+  {{ section_opener(
+      eyebrow=_("What to Expect"),
+      heading=_("Our response commitment"),
+      heading_level='h2',
+      heading_id='contact-response-title') }}
+  <div class="contact-response__body">
+    {% if org and org.response_time is defined and org.response_time %}
+    <p>{{ _("We aim to respond within %(time)s during business hours.", time=org.response_time) }}</p>
+    {% else %}
+    <p>{{ _("We aim to respond promptly during business hours.") }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

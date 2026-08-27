@@ -1,0 +1,195 @@
+{# =============================================================================
+   templates/pages/import_partner.html
+   Become an Import Partner — relationship page + qualifying form. Extends
+   base.html; consumes ONLY approved Batch 2 components (macros + form macros).
+   No new components, no CSS, no JS.
+
+   Locked section order (Architecture Lock, import partner):
+     Hero -> What partnership means -> Who it's for -> How it works ->
+     Model note -> Qualifying form -> Reassurance.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, form (PartnershipForm)
+     optional: contact_actions (global), whatsapp_message
+
+   PartnershipForm fields expected: name, company, email, phone, country,
+     product_lines, volume, frequency, target_market, message, consent.
+
+   Honest & relationship-focused: no exclusivity, no guaranteed supply, no
+   market-coverage promises. "Priority", not "guarantee".
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/forms.html' import form_field, form_textarea, form_select, form_consent, honeypot, field_errors %}
+
+{% block body_class %}page-import-partner{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Become an Import Partner") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% set _frequency_options = [
+  {'value': 'one-time', 'label': _("One-time")},
+  {'value': 'occasional', 'label': _("Occasional")},
+  {'value': 'regular', 'label': _("Regular / ongoing")}
+] %}
+{% set ns = namespace(errs=[]) %}
+{% if form and form.errors %}{% for _f, _e in form.errors.items() %}{% for _m in _e %}{% set _ = ns.errs.append(_m) %}{% endfor %}{% endfor %}{% endif %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="partner-hero" aria-labelledby="partner-hero-title">
+  {{ section_opener(
+      eyebrow=_("For Long-Term Buyers"),
+      heading=_("Build a long-term sourcing partnership"),
+      lead=_("For buyers who want a dependable, ongoing India sourcing partner — not a one-time transaction."),
+      heading_level='h1',
+      heading_id='partner-hero-title') }}
+</section>
+
+{# ------------------------------------------------ WHAT PARTNERSHIP MEANS -- #}
+<section class="partner-meaning" aria-labelledby="partner-meaning-title">
+  {{ section_opener(
+      eyebrow=_("What Partnership Means"),
+      heading=_("A working relationship, not a one-off order"),
+      heading_level='h2',
+      heading_id='partner-meaning-title') }}
+  <div class="partner-meaning__grid">
+    {{ value_card(_("Consistent supply coordination"), _("We coordinate ongoing supply through our networks against your recurring requirements."), icon='network.svg') }}
+    {{ value_card(_("Priority on our flagship line"), _("Partners receive priority attention on our flagship banana category."), icon='leaf.svg') }}
+    {{ value_card(_("Transparent dealing"), _("Clear communication and honest representation of what we can and cannot do."), icon='document.svg') }}
+    {{ value_card(_("A named, accountable team"), _("You work with the same accountable people across every order."), icon='handshake.svg') }}
+  </div>
+</section>
+
+{# ------------------------------------------------------------ WHO IT'S FOR - #}
+<section class="partner-audience" aria-labelledby="partner-audience-title">
+  {{ section_opener(
+      eyebrow=_("Who It's For"),
+      heading=_("Built for serious, repeat buyers"),
+      heading_level='h2',
+      heading_id='partner-audience-title') }}
+  <ul class="partner-audience__list" role="list">
+    <li>{{ _("Importers") }}</li>
+    <li>{{ _("Distributors") }}</li>
+    <li>{{ _("Retail sourcing teams") }}</li>
+    <li>{{ _("Wholesale buyers") }}</li>
+    <li>{{ _("Re-exporters") }}</li>
+  </ul>
+</section>
+
+{# ----------------------------------------------------------- HOW IT WORKS - #}
+<section class="partner-process" aria-labelledby="partner-process-title">
+  {{ section_opener(
+      eyebrow=_("How It Works"),
+      heading=_("A straightforward way to begin"),
+      heading_level='h2',
+      heading_id='partner-process-title') }}
+  <ol class="partner-process__steps">
+    <li class="partner-process__step">
+      <span class="partner-process__no" aria-hidden="true">1</span>
+      <h3 class="partner-process__title">{{ _("Share your requirements") }}</h3>
+      <p class="partner-process__text">{{ _("Tell us your products, volumes, frequency, and target markets.") }}</p>
+    </li>
+    <li class="partner-process__step">
+      <span class="partner-process__no" aria-hidden="true">2</span>
+      <h3 class="partner-process__title">{{ _("Align on expectations") }}</h3>
+      <p class="partner-process__text">{{ _("We discuss what we can realistically support and how we will communicate.") }}</p>
+    </li>
+    <li class="partner-process__step">
+      <span class="partner-process__no" aria-hidden="true">3</span>
+      <h3 class="partner-process__title">{{ _("Coordinate ongoing supply") }}</h3>
+      <p class="partner-process__text">{{ _("We coordinate sourcing, documentation, and shipments order by order.") }}</p>
+    </li>
+    <li class="partner-process__step">
+      <span class="partner-process__no" aria-hidden="true">4</span>
+      <h3 class="partner-process__title">{{ _("Continued support") }}</h3>
+      <p class="partner-process__text">{{ _("We stay in contact and adjust as your needs evolve.") }}</p>
+    </li>
+  </ol>
+</section>
+
+{# ----------------------------------------------------------- MODEL NOTE --- #}
+<section class="partner-model" aria-labelledby="partner-model-title">
+  {{ section_opener(
+      eyebrow=_("How We Operate"),
+      heading=_("An honest sourcing model"),
+      heading_level='h2',
+      heading_id='partner-model-title') }}
+  <div class="partner-model__body">
+    <p>{{ _("We are an export and trading company sourcing through established supplier networks. We do not own farms or cold-storage facilities. Our value as a partner is coordinating reliable supply, documentation, and shipment on your behalf.") }}</p>
+  </div>
+</section>
+
+{# ------------------------------------------------------- QUALIFYING FORM -- #}
+<section class="partner-form" aria-labelledby="partner-form-title">
+  {{ section_opener(
+      eyebrow=_("Start the Conversation"),
+      heading=_("Tell us about your sourcing needs"),
+      lead=_("Share a few details and we will follow up to discuss a partnership."),
+      heading_level='h2',
+      heading_id='partner-form-title') }}
+
+  {% if form %}
+  <form class="partner-form__form" method="post" action="{{ url_for('forms.submit_partner') }}" aria-labelledby="partner-form-title" novalidate>
+    {{ form.csrf_token }}
+    {{ honeypot() }}
+    {{ field_errors(ns.errs, title=_("Please correct the following:")) }}
+
+    {{ form_field('name', _("Full name"), required=True, value=(form.name.data or ''), error=(form.name.errors[0] if form.name.errors else none), autocomplete='name') }}
+    {{ form_field('company', _("Company"), required=True, value=(form.company.data or ''), error=(form.company.errors[0] if form.company.errors else none), autocomplete='organization') }}
+    {{ form_field('email', _("Email"), type='email', required=True, value=(form.email.data or ''), error=(form.email.errors[0] if form.email.errors else none), autocomplete='email', inputmode='email') }}
+    {{ form_field('phone', _("Phone (optional)"), type='tel', value=(form.phone.data or ''), error=(form.phone.errors[0] if form.phone.errors else none), autocomplete='tel', inputmode='tel') }}
+    {{ form_field('country', _("Country"), required=True, value=(form.country.data or ''), error=(form.country.errors[0] if form.country.errors else none), autocomplete='country-name') }}
+    {{ form_field('product_lines', _("Products of interest"), required=True, value=(form.product_lines.data or ''), error=(form.product_lines.errors[0] if form.product_lines.errors else none)) }}
+    {{ form_field('volume', _("Estimated volume (optional)"), value=(form.volume.data or ''), error=(form.volume.errors[0] if form.volume.errors else none)) }}
+    {{ form_select('frequency', _("Order frequency (optional)"), options=_frequency_options, selected=(form.frequency.data or ''), placeholder=_("Select frequency"), error=(form.frequency.errors[0] if form.frequency.errors else none)) }}
+    {{ form_field('target_market', _("Target market (optional)"), value=(form.target_market.data or ''), error=(form.target_market.errors[0] if form.target_market.errors else none)) }}
+    {{ form_textarea('message', _("Anything else we should know"), value=(form.message.data or ''), error=(form.message.errors[0] if form.message.errors else none), rows=5) }}
+    {{ form_consent('consent', _("I agree to be contacted about a potential partnership."), required=True, checked=form.consent.data, error=(form.consent.errors[0] if form.consent.errors else none)) }}
+
+    <div class="partner-form__actions">
+      {{ button(_("Submit partnership request"), type='submit', variant='primary', size='lg', full_width=True) }}
+    </div>
+  </form>
+  {% else %}
+  <div class="partner-form__fallback">
+    <p>{{ _("The partnership form is currently unavailable. Please reach us directly using the options below.") }}</p>
+  </div>
+  {% endif %}
+</section>
+
+{# ---------------------------------------------------------- REASSURANCE --- #}
+<section class="partner-reassurance" aria-labelledby="partner-reassurance-title">
+  {{ section_opener(
+      eyebrow=_("What to Expect"),
+      heading=_("A real person will follow up"),
+      heading_level='h2',
+      heading_id='partner-reassurance-title') }}
+  <div class="partner-reassurance__body">
+    {% if org and org.response_time is defined and org.response_time %}
+    <p>{{ _("We aim to respond within %(time)s.", time=org.response_time) }}</p>
+    {% else %}
+    <p>{{ _("We aim to respond promptly during business hours.") }}</p>
+    {% endif %}
+    {% if org and org.whatsapp_number %}
+    <p>
+      {{ button(_("Message us on WhatsApp"), href='https://wa.me/' ~ org.whatsapp_number, variant='secondary', new_tab=True, icon='whatsapp.svg') }}
+    </p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

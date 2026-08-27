@@ -1,0 +1,155 @@
+{# =============================================================================
+   templates/pages/export_process.html
+   Export Process ("How We Work"). Extends base.html; consumes ONLY approved
+   Batch 2 components (macros + trust_strip partial). No new components, no CSS,
+   no JS.
+
+   Locked section order (Architecture Lock, export process):
+     Hero -> Process steps -> Quality/coordination -> Documentation/compliance
+     -> Accountability & communication -> Track-record callout -> CTA.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo
+     optional: contact_actions (global), whatsapp_message
+
+   Honest throughout: describes coordination activities the trading model
+   actually performs; claims no owned facilities, no volumes, no certifications
+   beyond those held. Transparency over promotion.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-export-process{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Export Process") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="process-hero" aria-labelledby="process-hero-title">
+  {{ section_opener(
+      eyebrow=_("How We Work"),
+      heading=_("A clear, documented export process"),
+      lead=_("Every order follows a transparent, coordinated process — from sourcing through delivery — so you always know what is happening and who is accountable."),
+      heading_level='h1',
+      heading_id='process-hero-title') }}
+  <div class="process-hero__actions">
+    {{ button(_("Export Inquiry"), endpoint='forms.export_inquiry_page', variant='primary', size='lg') }}
+  </div>
+</section>
+
+{# ------------------------------------------------------- PROCESS STEPS ---- #}
+<section class="process-steps" aria-labelledby="process-steps-title">
+  {{ section_opener(
+      eyebrow=_("Step by Step"),
+      heading=_("How an export shipment works"),
+      heading_level='h2',
+      heading_id='process-steps-title') }}
+  <ol class="process-steps__list">
+    <li class="process-steps__step">
+      <span class="process-steps__no" aria-hidden="true">1</span>
+      <h3 class="process-steps__title">{{ _("Inquiry & requirements") }}</h3>
+      <p class="process-steps__text">{{ _("We start from your product, quantity, destination, and any quality or packaging requirements, so expectations are clear from the outset.") }}</p>
+    </li>
+    <li class="process-steps__step">
+      <span class="process-steps__no" aria-hidden="true">2</span>
+      <h3 class="process-steps__title">{{ _("Sourcing coordination") }}</h3>
+      <p class="process-steps__text">{{ _("We coordinate supply through our established supplier networks across India to meet the agreed requirements.") }}</p>
+    </li>
+    <li class="process-steps__step">
+      <span class="process-steps__no" aria-hidden="true">3</span>
+      <h3 class="process-steps__title">{{ _("Quality & shipment preparation") }}</h3>
+      <p class="process-steps__text">{{ _("Grading and quality are coordinated against your requirements, and the shipment is prepared and checked before dispatch.") }}</p>
+    </li>
+    <li class="process-steps__step">
+      <span class="process-steps__no" aria-hidden="true">4</span>
+      <h3 class="process-steps__title">{{ _("Documentation & compliance") }}</h3>
+      <p class="process-steps__text">{{ _("We handle the export documentation required for clearance, keeping paperwork accurate and complete.") }}</p>
+    </li>
+    <li class="process-steps__step">
+      <span class="process-steps__no" aria-hidden="true">5</span>
+      <h3 class="process-steps__title">{{ _("Logistics & delivery") }}</h3>
+      <p class="process-steps__text">{{ _("The shipment is coordinated with logistics partners to the destination port, with communication maintained through delivery.") }}</p>
+    </li>
+  </ol>
+</section>
+
+{# ------------------------------------------------- WHAT WE COORDINATE ----- #}
+<section class="process-coordinate" aria-labelledby="process-coordinate-title">
+  {{ section_opener(
+      eyebrow=_("What We Coordinate"),
+      heading=_("The work we manage on your behalf"),
+      lead=_("As your export and trading partner, we coordinate the moving parts so you deal with one accountable point of contact."),
+      heading_level='h2',
+      heading_id='process-coordinate-title') }}
+  <div class="process-coordinate__grid">
+    {{ value_card(
+        _("Sourcing coordination"),
+        _("Supply organised through vetted supplier networks across India."),
+        icon='network.svg') }}
+    {{ value_card(
+        _("Quality coordination"),
+        _("Grading and quality coordinated against your stated requirements."),
+        icon='check.svg') }}
+    {{ value_card(
+        _("Documentation & compliance"),
+        _("Export documentation prepared accurately for clearance."),
+        icon='document.svg') }}
+    {{ value_card(
+        _("Logistics coordination"),
+        _("Shipment coordinated with logistics partners to the destination port."),
+        icon='ship.svg') }}
+  </div>
+  {# Documentation realism note: procurement managers expect this; keeps the
+     process from reading as rigid or one-size-fits-all. #}
+  <p class="process-coordinate__note">{{ _("Documentation requirements may vary depending on the destination market and buyer requirements.") }}</p>
+</section>
+
+{# -------------------------------------- ACCOUNTABILITY & COMMUNICATION ---- #}
+<section class="process-accountability" aria-labelledby="process-accountability-title">
+  {{ section_opener(
+      eyebrow=_("Communication & Accountability"),
+      heading=_("One accountable contact, kept in touch"),
+      heading_level='h2',
+      heading_id='process-accountability-title') }}
+  <div class="process-accountability__body">
+    <p>{{ _("Throughout each order you work with a single, accountable point of contact. We keep you informed from confirmation through delivery, and we raise issues early rather than late.") }}</p>
+    <p>{{ _("As a family-owned company, the people who make commitments are the same people who stand behind them.") }}</p>
+  </div>
+</section>
+
+{# ----------------------------------------------- TRACK-RECORD CALLOUT ----- #}
+{% set proof_items = [
+  {'label': _("Exporting to the Gulf — including Oman & Abu Dhabi"), 'icon': 'route.svg'},
+  {'label': _("Registered & licensed Indian exporter"), 'icon': 'badge.svg'},
+  {'label': _("Accurate export documentation"), 'icon': 'document.svg'}
+] %}
+{% set trust_strip_label = _("Our export track record") %}
+{% include 'partials/trust_strip.html' %}
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Have a shipment in mind?"),
+    text=_("Send an export inquiry with your requirements, or explore a long-term sourcing partnership."),
+    primary={'label': _("Export Inquiry"), 'endpoint': 'forms.export_inquiry_page'},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='process-cta-title') }}
+
+{% endblock %}

@@ -1,0 +1,272 @@
+{# =============================================================================
+   templates/pages/home.html
+   Homepage. Extends base.html; consumes ONLY the approved Batch 2 component
+   layer (macros + partials). No new components, no CSS, no JS.
+
+   Section order is the LOCKED sequence (Architecture Lock):
+     Hero -> Trust strip -> Products -> Why us -> Process -> Markets ->
+     Founder -> Certifications -> [optional social proof] -> [optional profile]
+     -> Closing CTA.
+
+   Context (see base.html for globals):
+     required: current_locale, text_dir, nav, org, seo
+     optional: products, markets, testimonials, company_profile_url,
+               certifications (global), contact_actions (global), whatsapp_message
+
+   All visible strings are translatable (gettext). Honest positioning: an
+   export & trading company sourcing through supplier networks — no claim of
+   owned farms or cold storage, no fabricated volume or scale.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import product_card, value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-home{% endblock %}
+
+{# Page-specific structured data (Organization is emitted globally in base) #}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ (org.name if org and org.name else config.SITE_NAME) | tojson }},
+  "url": {{ (org.url if org and org.url else request.url_root) | tojson }},
+  "inLanguage": {{ current_locale | tojson }}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="home-hero" aria-labelledby="home-hero-title">
+  {# Decorative background video, poster-gated. Reduced-motion / slow-connection
+     gating is wired in the JS phase; the poster carries the experience until then. #}
+  <div class="home-hero__media" aria-hidden="true">
+    <video class="home-hero__video"
+           autoplay muted loop playsinline preload="none"
+           poster="{{ url_for('static', filename='img/hero/hero-poster.jpg') }}">
+      <source src="{{ url_for('static', filename='video/hero/hero.webm') }}" type="video/webm">
+      <source src="{{ url_for('static', filename='video/hero/hero.mp4') }}" type="video/mp4">
+    </video>
+  </div>
+  <div class="home-hero__content">
+    {{ section_opener(
+        eyebrow=_("Indian Agricultural Export & Trading"),
+        heading=_("A trusted export partner connecting Indian produce with Gulf markets"),
+        lead=_("We source quality agricultural products through established supplier networks and manage reliable, well-documented exports for buyers across the Gulf."),
+        heading_level='h1',
+        heading_id='home-hero-title') }}
+    <div class="home-hero__actions">
+      {{ button(_("Export Inquiry"), endpoint='forms.export_inquiry_page', variant='primary', size='lg') }}
+      {{ button(_("Become an Import Partner"), endpoint='forms.import_partner_page', variant='secondary', size='lg') }}
+    </div>
+  </div>
+</section>
+
+{# ---------------------------------------------------------- TRUST STRIP ---- #}
+{% set proof_items = [
+  {'label': _("Exporting to the Gulf — including Oman & Abu Dhabi"), 'icon': 'route.svg'},
+  {'label': _("Registered & licensed Indian exporter"), 'icon': 'badge.svg'},
+  {'label': _("Banana-led product specialization"), 'icon': 'leaf.svg'}
+] %}
+{% set trust_strip_label = _("Our credentials") %}
+{% include 'partials/trust_strip.html' %}
+
+{# ------------------------------------------------------------ PRODUCTS ---- #}
+{% if products %}
+<section class="home-products" aria-labelledby="home-products-title">
+  {{ section_opener(
+      eyebrow=_("What We Export"),
+      heading=_("Our products"),
+      lead=_("Quality produce sourced through established supplier networks and prepared for export to Gulf buyers."),
+      heading_level='h2',
+      heading_id='home-products-title') }}
+  <div class="home-products__grid">
+    {% for product in products %}
+      {{ product_card(product, featured=product.featured, heading_level='h3', eager=(loop.first and product.featured)) }}
+    {% endfor %}
+  </div>
+  <p class="home-products__more">
+    {{ button(_("View all products"), endpoint='products.index', variant='tertiary') }}
+  </p>
+</section>
+{% endif %}
+
+{# -------------------------------------------------------------- WHY US ---- #}
+<section class="home-why" aria-labelledby="home-why-title">
+  {{ section_opener(
+      eyebrow=_("Why Royal Exotic Farms"),
+      heading=_("Built for reliable, accountable trade"),
+      heading_level='h2',
+      heading_id='home-why-title') }}
+  <div class="home-why__grid">
+    {{ value_card(
+        _("A single point of accountability"),
+        _("Instead of coordinating with several suppliers yourself, you work with one partner who manages sourcing across our networks, prepares shipments, and handles export documentation — one accountable contact from inquiry through delivery."),
+        icon='network.svg') }}
+    {{ value_card(
+        _("Proven export experience"),
+        _("Demonstrated exports to the Gulf, including Oman and Abu Dhabi."),
+        icon='ship.svg') }}
+    {{ value_card(
+        _("Transparent operations"),
+        _("We represent our role honestly: an export and trading company that sources and ships — not a claim of owned farms or cold storage."),
+        icon='document.svg') }}
+    {{ value_card(
+        _("Accountable family ownership"),
+        _("A family-run business that stands behind every shipment and relationship."),
+        icon='handshake.svg') }}
+  </div>
+</section>
+
+{# ------------------------------------------------------------- PROCESS ---- #}
+<section class="home-process" aria-labelledby="home-process-title">
+  {{ section_opener(
+      eyebrow=_("How We Work"),
+      heading=_("A clear, documented export process"),
+      lead=_("Every shipment follows a transparent, coordinated process from sourcing to delivery."),
+      heading_level='h2',
+      heading_id='home-process-title') }}
+  <ol class="home-process__steps">
+    <li class="home-process__step">
+      <span class="home-process__step-no" aria-hidden="true">1</span>
+      <h3 class="home-process__step-title">{{ _("Sourcing") }}</h3>
+      <p class="home-process__step-text">{{ _("Produce sourced through vetted supplier networks across India.") }}</p>
+    </li>
+    <li class="home-process__step">
+      <span class="home-process__step-no" aria-hidden="true">2</span>
+      <h3 class="home-process__step-title">{{ _("Quality coordination") }}</h3>
+      <p class="home-process__step-text">{{ _("Grading and quality coordinated against agreed buyer requirements.") }}</p>
+    </li>
+    <li class="home-process__step">
+      <span class="home-process__step-no" aria-hidden="true">3</span>
+      <h3 class="home-process__step-title">{{ _("Documentation & compliance") }}</h3>
+      <p class="home-process__step-text">{{ _("Export documentation and compliance handled accurately for clearance.") }}</p>
+    </li>
+    <li class="home-process__step">
+      <span class="home-process__step-no" aria-hidden="true">4</span>
+      <h3 class="home-process__step-title">{{ _("Logistics & shipping") }}</h3>
+      <p class="home-process__step-text">{{ _("Shipment prepared and coordinated with logistics partners to the destination port.") }}</p>
+    </li>
+    <li class="home-process__step">
+      <span class="home-process__step-no" aria-hidden="true">5</span>
+      <h3 class="home-process__step-title">{{ _("Delivery & support") }}</h3>
+      <p class="home-process__step-text">{{ _("Ongoing communication through delivery and beyond.") }}</p>
+    </li>
+  </ol>
+  <p class="home-process__more">
+    {{ button(_("See our full process"), endpoint='main.export_process', variant='tertiary') }}
+  </p>
+</section>
+
+{# ------------------------------------------------------------- MARKETS ---- #}
+<section class="home-markets" aria-labelledby="home-markets-title">
+  {{ section_opener(
+      eyebrow=_("Markets We Serve"),
+      heading=_("Focused on the Gulf, expanding through trusted trade relationships"),
+      lead=_("We currently export to the Gulf, including Oman and Abu Dhabi, and are expanding through trusted, long-term trade relationships."),
+      heading_level='h2',
+      heading_id='home-markets-title') }}
+  <div class="home-markets__media">
+    <img class="home-markets__map"
+         src="{{ url_for('static', filename='img/markets/gulf-map.svg') }}"
+         alt="{{ _('Map highlighting the Gulf markets Royal Exotic Farms exports to') }}"
+         width="960" height="540" loading="lazy" decoding="async">
+  </div>
+  {% if markets %}
+  <ul class="home-markets__list" role="list">
+    {% for market in markets %}
+    <li class="home-markets__market home-markets__market--{{ market.status }}">
+      <span class="home-markets__market-name">{{ market.name }}</span>
+      {% if market.status == 'served' %}<span class="home-markets__market-tag">{{ _("Active") }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <p class="home-markets__more">
+    {{ button(_("Explore our markets"), endpoint='main.markets', variant='tertiary') }}
+  </p>
+</section>
+
+{# ------------------------------------------------------------- FOUNDER ---- #}
+<section class="home-founder" aria-labelledby="home-founder-title">
+  {{ section_opener(
+      eyebrow=_("Leadership & Accountability"),
+      heading=_("A family business accountable for every shipment"),
+      heading_level='h2',
+      heading_id='home-founder-title') }}
+  <div class="home-founder__inner">
+    <div class="home-founder__portrait">
+      <img class="home-founder__img"
+           src="{{ url_for('static', filename='img/founder/founder-portrait.jpg') }}"
+           alt="{{ org.founder_name if (org and org.founder_name) else _('Founder, Royal Exotic Farms') }}"
+           width="480" height="640" loading="lazy" decoding="async">
+    </div>
+    <div class="home-founder__text">
+      <p>{{ _("Royal Exotic Farms is a family-run export and trading company built on honest dealing and long-term relationships. The people you work with are directly accountable for the company’s commitments.") }}</p>
+      {{ button(_("Learn about our leadership"), endpoint='main.founder', variant='tertiary') }}
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------------ CERTIFICATIONS ---- #}
+{% set cert_section_title = _("Certifications & Registrations") %}
+{% set cert_section_id = 'home-certifications-title' %}
+{% set cert_section_mode = 'full' %}
+{% include 'partials/certifications_section.html' %}
+
+{# -------------------------------------------- SOCIAL PROOF (optional) ----- #}
+{% if testimonials %}
+<section class="home-testimonials" aria-labelledby="home-testimonials-title">
+  {{ section_opener(
+      eyebrow=_("In Their Words"),
+      heading=_("What our buyers say"),
+      heading_level='h2',
+      heading_id='home-testimonials-title') }}
+  <ul class="home-testimonials__list" role="list">
+    {% for t in testimonials %}
+    <li class="home-testimonials__item">
+      <figure class="home-testimonials__figure">
+        <blockquote class="home-testimonials__quote"><p>{{ t.quote }}</p></blockquote>
+        {% if t.author %}
+        <figcaption class="home-testimonials__author">
+          {{ t.author }}{% if t.role %}, <span class="home-testimonials__role">{{ t.role }}</span>{% endif %}
+        </figcaption>
+        {% endif %}
+      </figure>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# ------------------------------------------- COMPANY PROFILE (optional) --- #}
+{% if company_profile_url %}
+<section class="home-profile" aria-labelledby="home-profile-title">
+  {{ section_opener(
+      eyebrow=_("Company Profile"),
+      heading=_("Company & product profile"),
+      lead=_("Download our company and product profile for your records or procurement review."),
+      heading_level='h2',
+      heading_id='home-profile-title') }}
+  <p class="home-profile__action">
+    {{ button(_("Download profile (PDF)"), href=company_profile_url, variant='secondary', new_tab=true, icon='document.svg') }}
+  </p>
+</section>
+{% endif %}
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Ready to discuss your next shipment?"),
+    text=_("Send an export inquiry or start a long-term sourcing partnership. We respond promptly."),
+    primary={'label': _("Export Inquiry"), 'endpoint': 'forms.export_inquiry_page'},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='home-cta-title') }}
+
+{% endblock %}

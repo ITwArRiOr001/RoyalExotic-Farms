@@ -1,0 +1,41 @@
+{# =============================================================================
+   templates/pages/inquiry_success.html
+   Submission confirmation state (Post/Redirect/Get target for all forms).
+   Added in Phase 4A to complete the form flow. Consumes ONLY approved Batch 2
+   components (section_opener, button, cta_band). No new components/macros/
+   patterns. Marked noindex by the route (forms.success).
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, success_heading
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-success{% endblock %}
+
+{% block content %}
+<section class="success" aria-labelledby="success-title">
+  {{ section_opener(
+      eyebrow=_("Received"),
+      heading=success_heading,
+      lead=_("A real person will review your message and respond, typically within 1–2 business days."),
+      heading_level='h1',
+      heading_id='success-title',
+      align='center') }}
+  <div class="success__actions" style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-block-start:1.5rem;">
+    {{ button(_("Back to homepage"), endpoint='main.home', variant='primary') }}
+    {{ button(_("View products"), endpoint='products.index', variant='secondary') }}
+  </div>
+</section>
+
+{{ cta_band(
+    heading=_("While you wait"),
+    text=_("Explore our export process to see exactly how an order is handled."),
+    primary={'label': _("See our export process"), 'endpoint': 'main.export_process'},
+    theme='light',
+    heading_level='h2',
+    heading_id='success-cta-title') }}
+{% endblock %}

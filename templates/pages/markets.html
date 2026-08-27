@@ -1,0 +1,162 @@
+{# =============================================================================
+   templates/pages/markets.html
+   Markets We Serve. Extends base.html; consumes ONLY approved Batch 2
+   components. No new components, no CSS, no JS.
+
+   Locked section order (Architecture Lock, markets):
+     Hero -> Map -> Current reach -> Markets in development -> Expansion
+     approach -> Advantages -> CTA.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo
+     optional: markets, contact_actions (global), whatsapp_message
+
+   markets (data/markets.py): items { code, name, status('served'|'target'),
+     coords, order, note }.
+
+   CONSERVATIVE & HONEST: states only verified current reach; frames
+   development as relationships being built, not market presence; no dominance,
+   no global-scale claims. If market data is absent, current reach falls back to
+   the verified Oman / Abu Dhabi activity only; markets-in-development is omitted
+   rather than invented.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-markets{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Markets") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% set served_markets = (markets | selectattr('status', 'equalto', 'served') | list) if markets else [] %}
+{% set target_markets = (markets | selectattr('status', 'equalto', 'target') | list) if markets else [] %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="markets-hero" aria-labelledby="markets-hero-title">
+  {{ section_opener(
+      eyebrow=_("Markets We Serve"),
+      heading=_("Where we export today, and where we are growing"),
+      lead=_("We are focused on the Gulf and expand through trusted, long-term trade relationships rather than overstated reach."),
+      heading_level='h1',
+      heading_id='markets-hero-title') }}
+</section>
+
+{# ------------------------------------------------------------------ MAP ---- #}
+<section class="markets-map" aria-labelledby="markets-map-title">
+  {{ section_opener(
+      eyebrow=_("Our Focus"),
+      heading=_("Focused on the Gulf region"),
+      heading_level='h2',
+      heading_id='markets-map-title') }}
+  <div class="markets-map__media">
+    <img class="markets-map__img"
+         src="{{ url_for('static', filename='img/markets/gulf-map.svg') }}"
+         alt="{{ _('Map of the Gulf region highlighting the markets Royal Exotic Farms exports to and is developing') }}"
+         width="960" height="540" loading="lazy" decoding="async">
+  </div>
+</section>
+
+{# -------------------------------------------------------- CURRENT REACH ---- #}
+<section class="markets-current" aria-labelledby="markets-current-title">
+  {{ section_opener(
+      eyebrow=_("Current Reach"),
+      heading=_("Markets we currently serve"),
+      heading_level='h2',
+      heading_id='markets-current-title') }}
+  {% if served_markets %}
+  <ul class="markets-current__list" role="list">
+    {% for market in served_markets %}
+    <li class="markets-current__item">
+      <span class="markets-current__name">{{ market.name }}</span>
+      {% if market.note is defined and market.note %}<span class="markets-current__note">{{ market.note }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="markets-current__body">
+    <p>{{ _("We currently export to the Gulf, including Oman and Abu Dhabi.") }}</p>
+  </div>
+  {% endif %}
+</section>
+
+{# -------------------------------------------------- MARKETS IN DEVELOPMENT - #}
+{% if target_markets %}
+<section class="markets-developing" aria-labelledby="markets-developing-title">
+  {{ section_opener(
+      eyebrow=_("In Development"),
+      heading=_("Markets we are developing"),
+      lead=_("We are building relationships in these markets. We list them as areas of active development, not as established presence."),
+      heading_level='h2',
+      heading_id='markets-developing-title') }}
+  <ul class="markets-developing__list" role="list">
+    {% for market in target_markets %}
+    <li class="markets-developing__item">
+      <span class="markets-developing__name">{{ market.name }}</span>
+      {% if market.note is defined and market.note %}<span class="markets-developing__note">{{ market.note }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# ------------------------------------------------------ EXPANSION APPROACH - #}
+<section class="markets-approach" aria-labelledby="markets-approach-title">
+  {{ section_opener(
+      eyebrow=_("How We Expand"),
+      heading=_("Expansion through trusted relationships"),
+      heading_level='h2',
+      heading_id='markets-approach-title') }}
+  <div class="markets-approach__body">
+    <p>{{ _("We grow by earning repeat business and building long-term relationships with importers and distributors, one reliable shipment at a time. We would rather be a dependable partner in a few markets than overstate our reach across many.") }}</p>
+  </div>
+</section>
+
+{# ------------------------------------------------------------ ADVANTAGES --- #}
+<section class="markets-advantages" aria-labelledby="markets-advantages-title">
+  {{ section_opener(
+      eyebrow=_("Sourcing from India"),
+      heading=_("Why buyers source from India through us"),
+      heading_level='h2',
+      heading_id='markets-advantages-title') }}
+  <div class="markets-advantages__grid">
+    {{ value_card(
+        _("Proximity to the Gulf"),
+        _("India's location supports comparatively short shipping times to Gulf ports."),
+        icon='route.svg') }}
+    {{ value_card(
+        _("A broad supply base"),
+        _("Access to a large agricultural supply base through our supplier networks."),
+        icon='network.svg') }}
+    {{ value_card(
+        _("A single accountable partner"),
+        _("One accountable contact coordinating sourcing, documentation, and delivery."),
+        icon='handshake.svg') }}
+  </div>
+</section>
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Exporting to your market?"),
+    text=_("Tell us your market and requirements through an export inquiry, or explore a long-term sourcing partnership."),
+    primary={'label': _("Export Inquiry"), 'endpoint': 'forms.export_inquiry_page'},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='markets-cta-title') }}
+
+{% endblock %}
