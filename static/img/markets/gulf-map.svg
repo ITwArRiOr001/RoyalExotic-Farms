@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-label="Map showing India as origin, current Gulf markets in Oman and Abu Dhabi, UAE, and markets in development in Saudi Arabia, Qatar and Kuwait.">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrowGold" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#B89A52"/>
+    </marker>
+  </defs>
+
+  <!-- Quiet neutral field -->
+  <rect width="960" height="540" fill="#F7F4EC"/>
+
+  <!-- Subtle regional context: editable geographic silhouettes, intentionally restrained -->
+  <g fill="#ECE8DE" stroke="#D5D0C4" stroke-width="1.2" stroke-linejoin="round">
+    <!-- Iran -->
+    <path d="M454 87 L505 68 L568 80 L612 109 L596 143 L548 151 L515 170 L469 154 L440 124 Z"/>
+    <!-- Iraq -->
+    <path d="M373 125 L416 111 L451 126 L458 158 L438 188 L400 184 L372 160 Z"/>
+    <!-- Pakistan -->
+    <path d="M704 154 L757 150 L790 180 L778 219 L741 236 L706 214 L686 183 Z"/>
+    <!-- Yemen -->
+    <path d="M270 321 L323 315 L366 339 L349 371 L299 376 L265 351 Z"/>
+    <!-- East Africa context -->
+    <path d="M90 355 L145 330 L198 349 L225 402 L207 466 L155 493 L112 460 L96 410 Z"/>
+    <!-- Arabian Peninsula neutral coastline context -->
+    <path d="M165 166 L226 134 L307 145 L361 175 L405 216 L407 268 L374 313 L330 325 L276 315 L232 292 L195 250 L170 209 Z"/>
+  </g>
+
+  <!-- Saudi Arabia: development market -->
+  <path id="saudi-arabia" d="M180 167 L224 137 L286 145 L329 168 L357 195 L365 231 L348 270 L325 304 L287 318 L248 303 L215 278 L192 244 L176 211 Z"
+        fill="#C6AA65" stroke="#9F874F" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Kuwait: development market -->
+  <path id="kuwait" d="M330 118 L347 111 L360 119 L357 137 L342 142 L331 133 Z"
+        fill="#C6AA65" stroke="#9F874F" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Qatar: development market -->
+  <path id="qatar" d="M349 194 L358 190 L363 197 L359 211 L351 215 L347 206 Z"
+        fill="#C6AA65" stroke="#9F874F" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- UAE: current market; geographic country shape highlighted -->
+  <path id="uae" d="M364 249 L382 241 L402 246 L411 259 L405 270 L388 274 L373 268 Z"
+        fill="#174C3A" stroke="#123B2E" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Abu Dhabi marker, since repository specifies Abu Dhabi, UAE -->
+  <circle cx="380" cy="257" r="5.5" fill="#C6AA65" stroke="#F7F4EC" stroke-width="2"/>
+
+  <!-- Oman: current market -->
+  <path id="oman" d="M408 268 L427 257 L444 268 L452 293 L444 321 L425 341 L405 329 L398 303 L404 284 Z"
+        fill="#174C3A" stroke="#123B2E" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- India: origin -->
+  <path id="india" d="M617 157 L650 148 L682 163 L707 186 L731 211 L741 241 L733 272 L716 300 L700 331 L682 362 L664 395 L644 424 L626 414 L617 389 L603 360 L594 327 L585 292 L577 255 L575 221 L587 190 Z"
+        fill="#174C3A" stroke="#123B2E" stroke-width="2.2" stroke-linejoin="round"/>
+
+  <!-- India origin marker -->
+  <circle cx="622" cy="225" r="7" fill="#C6AA65" stroke="#F7F4EC" stroke-width="3"/>
+
+  <!-- Subtle India-to-Gulf directional relationships -->
+  <g fill="none" stroke="#B89A52" stroke-width="2" stroke-dasharray="6 6" opacity=".82" marker-end="url(#arrowGold)">
+    <path d="M614 226 C552 211 502 205 448 273"/>
+    <path d="M618 231 C553 246 500 257 447 296"/>
+  </g>
+
+  <!-- Minimal supported labels -->
+  <g font-family="Arial, Helvetica, sans-serif" fill="#23463A">
+    <text x="630" y="218" font-size="17" font-weight="700" letter-spacing="3">INDIA</text>
+
+    <text x="344" y="105" font-size="12" font-weight="700" letter-spacing="1.2">KUWAIT</text>
+    <text x="366" y="187" font-size="12" font-weight="700" letter-spacing="1.0">QATAR</text>
+    <text x="230" y="222" font-size="13" font-weight="700" letter-spacing="1.1">SAUDI ARABIA</text>
+    <text x="366" y="292" font-size="11" font-weight="700" letter-spacing=".6">ABU DHABI, UAE</text>
+    <text x="423" y="316" font-size="12" font-weight="700" letter-spacing="1.0">OMAN</text>
+  </g>
+
+  <!-- Accessible legend -->
+  <g font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#34453F">
+    <rect x="46" y="448" width="15" height="15" rx="3" fill="#174C3A"/>
+    <text x="70" y="461" letter-spacing=".8">CURRENT MARKETS</text>
+    <rect x="46" y="480" width="15" height="15" rx="3" fill="#C6AA65"/>
+    <text x="70" y="493" letter-spacing=".8">MARKETS IN DEVELOPMENT</text>
+  </g>
+</svg>
