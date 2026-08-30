@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Fresh Indian export onions</title>
+  <desc id="desc">Editable vector artwork of naturally varied fresh Indian onions arranged on a restrained agricultural surface, with realistic papery skins, subtle imperfections, natural light and soft shadows.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7F3E9"/>
+      <stop offset="0.58" stop-color="#EEE7D8"/>
+      <stop offset="1" stop-color="#D8C9AE"/>
+    </linearGradient>
+
+    <linearGradient id="surface" x1="0" y1="690" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B9A27F"/>
+      <stop offset="1" stop-color="#8F7759"/>
+    </linearGradient>
+
+    <radialGradient id="onionRed" cx="38%" cy="27%" r="78%">
+      <stop offset="0" stop-color="#E6A37C"/>
+      <stop offset="0.28" stop-color="#B95D45"/>
+      <stop offset="0.63" stop-color="#8B3D35"/>
+      <stop offset="0.88" stop-color="#66302F"/>
+      <stop offset="1" stop-color="#472529"/>
+    </radialGradient>
+
+    <radialGradient id="onionPurple" cx="38%" cy="25%" r="78%">
+      <stop offset="0" stop-color="#DDA2A5"/>
+      <stop offset="0.3" stop-color="#A65C69"/>
+      <stop offset="0.62" stop-color="#743C52"/>
+      <stop offset="0.9" stop-color="#4E2B3E"/>
+      <stop offset="1" stop-color="#392431"/>
+    </radialGradient>
+
+    <radialGradient id="onionBrown" cx="38%" cy="25%" r="80%">
+      <stop offset="0" stop-color="#D7A36C"/>
+      <stop offset="0.28" stop-color="#A66B43"/>
+      <stop offset="0.64" stop-color="#70472F"/>
+      <stop offset="0.9" stop-color="#4C342B"/>
+      <stop offset="1" stop-color="#382A27"/>
+    </radialGradient>
+
+    <linearGradient id="skinLight" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F2C49C" stop-opacity=".8"/>
+      <stop offset=".55" stop-color="#B66A50" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#4A292C" stop-opacity=".15"/>
+    </linearGradient>
+
+    <linearGradient id="root" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D5C4A0"/>
+      <stop offset=".55" stop-color="#A89069"/>
+      <stop offset="1" stop-color="#65533E"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+
+    <filter id="smallShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+
+    <filter id="paperSoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.45"/>
+    </filter>
+
+    <g id="onion-main">
+      <!-- onion body -->
+      <path d="M0 150 C-22 108 -21 53 3 19 C24 -11 64 -29 108 -25 C153 -21 188 5 203 42 C220 84 214 130 190 165 C169 195 136 218 101 224 C63 230 23 210 5 180 C-2 168 -5 158 0 150Z"
+            fill="url(#onionRed)" stroke="#5B3030" stroke-width="3"/>
+      <!-- papery outer layers -->
+      <path d="M9 155 C-4 112 4 55 28 25 C50 -3 85 -13 118 -9 C159 -5 184 20 196 55"
+            fill="none" stroke="#E3AE86" stroke-opacity=".42" stroke-width="8" stroke-linecap="round"/>
+      <path d="M25 180 C8 137 15 78 39 43 C58 16 91 7 123 12 C157 17 181 39 190 71"
+            fill="none" stroke="#F0C19A" stroke-opacity=".26" stroke-width="5" stroke-linecap="round"/>
+      <path d="M45 197 C29 151 34 101 53 67 C71 36 101 27 131 32 C155 36 174 53 181 78"
+            fill="none" stroke="#4D292D" stroke-opacity=".27" stroke-width="4"/>
+      <!-- natural bruising / blemishes -->
+      <ellipse cx="55" cy="117" rx="14" ry="8" fill="#542D2E" opacity=".24" transform="rotate(-17 55 117)"/>
+      <ellipse cx="153" cy="135" rx="10" ry="17" fill="#3F282C" opacity=".18" transform="rotate(25 153 135)"/>
+      <path d="M104 79 C112 73 118 73 123 78" stroke="#4A292C" stroke-opacity=".28" stroke-width="4" stroke-linecap="round"/>
+      <!-- neck -->
+      <path d="M62 -14 C72 -39 78 -57 88 -72 C98 -87 112 -92 122 -83 C132 -73 126 -53 116 -37 C108 -24 102 -14 99 -4Z"
+            fill="url(#root)" stroke="#6B5540" stroke-width="3"/>
+      <!-- dry roots -->
+      <path d="M92 211 C91 224 86 236 80 246 M102 216 C104 230 108 238 114 247 M112 214 C119 225 126 230 134 233"
+            stroke="#B7A17A" stroke-width="4" stroke-linecap="round"/>
+      <path d="M89 211 C92 222 98 229 104 233" stroke="#5E4939" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <g id="onion-brown">
+      <path d="M0 135 C-18 91 -10 42 18 12 C43 -15 78 -26 115 -20 C151 -14 179 10 192 43 C207 80 198 124 177 153 C155 183 121 199 86 202 C50 204 17 186 3 158 C-2 148 -3 142 0 135Z"
+            fill="url(#onionBrown)" stroke="#53372B" stroke-width="3"/>
+      <path d="M11 144 C2 102 11 55 35 27 C56 3 83 -5 112 0 C145 5 169 27 179 56"
+            fill="none" stroke="#E0B27E" stroke-opacity=".44" stroke-width="7" stroke-linecap="round"/>
+      <path d="M35 171 C22 128 29 82 48 54 C66 28 91 20 118 24 C145 28 163 46 170 71"
+            fill="none" stroke="#F0CA98" stroke-opacity=".22" stroke-width="5"/>
+      <ellipse cx="58" cy="104" rx="11" ry="7" fill="#4B3028" opacity=".22"/>
+      <path d="M103 57 C111 51 119 52 124 58" stroke="#3E2B28" stroke-opacity=".27" stroke-width="4" stroke-linecap="round"/>
+      <path d="M67 -8 C76 -34 82 -48 91 -62 C100 -75 113 -80 122 -72 C132 -63 127 -46 118 -30 C111 -18 106 -7 101 3Z"
+            fill="url(#root)" stroke="#68503C" stroke-width="3"/>
+      <path d="M83 191 C83 207 77 217 72 226 M94 195 C98 208 102 217 109 224 M103 194 C112 204 119 209 127 211"
+            stroke="#AD9670" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- calm, naturally lit background -->
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <path d="M0 520 C300 470 530 495 790 515 C1050 535 1330 500 1600 465 L1600 900 L0 900Z" fill="url(#surface)" opacity=".88"/>
+
+  <!-- soft daylight -->
+  <ellipse cx="360" cy="270" rx="430" ry="250" fill="#FFFDF4" opacity=".5"/>
+  <path d="M0 0 L770 0 L580 540 L0 620Z" fill="#FFFDF5" opacity=".22"/>
+
+  <!-- grounding shadows -->
+  <ellipse cx="1010" cy="738" rx="505" ry="105" fill="#3D3026" opacity=".22" filter="url(#softShadow)"/>
+  <ellipse cx="1190" cy="650" rx="250" ry="72" fill="#3D3026" opacity=".18" filter="url(#smallShadow)"/>
+
+  <!-- rear onions, varied sizes and orientation -->
+  <g transform="translate(1010 430) scale(.74) rotate(-8)">
+    <use href="#onion-brown"/>
+  </g>
+  <g transform="translate(1220 465) scale(.66) rotate(13)">
+    <use href="#onion-main"/>
+  </g>
+  <g transform="translate(1390 475) scale(.56) rotate(-10)">
+    <use href="#onion-brown"/>
+  </g>
+
+  <!-- primary onions -->
+  <g transform="translate(835 465) scale(1.12) rotate(-7)">
+    <use href="#onion-main"/>
+  </g>
+  <g transform="translate(1080 485) scale(1.22) rotate(8)">
+    <use href="#onion-main"/>
+  </g>
+  <g transform="translate(1325 505) scale(1.05) rotate(-5)">
+    <use href="#onion-brown"/>
+  </g>
+
+  <!-- foreground onion with slightly purple/red natural variation -->
+  <g transform="translate(650 540) scale(1.34) rotate(7)">
+    <path d="M0 150 C-22 108 -21 53 3 19 C24 -11 64 -29 108 -25 C153 -21 188 5 203 42 C220 84 214 130 190 165 C169 195 136 218 101 224 C63 230 23 210 5 180 C-2 168 -5 158 0 150Z"
+          fill="url(#onionPurple)" stroke="#542C42" stroke-width="3"/>
+    <path d="M9 155 C-4 112 4 55 28 25 C50 -3 85 -13 118 -9 C159 -5 184 20 196 55"
+          fill="none" stroke="#E6B0AE" stroke-opacity=".4" stroke-width="8" stroke-linecap="round"/>
+    <path d="M25 180 C8 137 15 78 39 43 C58 16 91 7 123 12 C157 17 181 39 190 71"
+          fill="none" stroke="#F2C9C2" stroke-opacity=".22" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="54" cy="120" rx="13" ry="8" fill="#3D2735" opacity=".23" transform="rotate(-16 54 120)"/>
+    <ellipse cx="153" cy="135" rx="10" ry="17" fill="#352531" opacity=".18" transform="rotate(25 153 135)"/>
+    <path d="M104 79 C112 73 118 73 123 78" stroke="#382530" stroke-opacity=".28" stroke-width="4" stroke-linecap="round"/>
+    <path d="M62 -14 C72 -39 78 -57 88 -72 C98 -87 112 -92 122 -83 C132 -73 126 -53 116 -37 C108 -24 102 -14 99 -4Z"
+          fill="url(#root)" stroke="#6B5540" stroke-width="3"/>
+    <path d="M92 211 C91 224 86 236 80 246 M102 216 C104 230 108 238 114 247 M112 214 C119 225 126 230 134 233"
+          stroke="#B7A17A" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- two small loose onions for natural variation -->
+  <g transform="translate(465 665) scale(.62) rotate(-12)">
+    <use href="#onion-brown"/>
+  </g>
+  <g transform="translate(1390 665) scale(.58) rotate(15)">
+    <use href="#onion-main"/>
+  </g>
+
+  <!-- subtle surface grain/lines as vector marks -->
+  <g opacity=".18" stroke="#6F5A43" stroke-width="2" stroke-linecap="round">
+    <path d="M80 812 C260 786 385 798 520 820"/>
+    <path d="M1040 836 C1190 815 1325 821 1510 805"/>
+    <path d="M220 862 C360 846 460 850 590 865"/>
+  </g>
+</svg>
