@@ -1,0 +1,9 @@
+<!-- Royal Exotic Farms icon family: editable SVG -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+<g stroke="#174C3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 18.5h24l-3.1 5.2c-1 1.7-2.7 2.8-4.7 2.8H11.8c-2 0-3.7-1.1-4.7-2.8L4 18.5Z"/>
+  <path d="M8.2 18.5V10h13.6v8.5M11 10V6h8v4"/>
+  <path d="M4 23.5c2 0 2 .9 4 0s2-.9 4 0 2 .9 4 0 2-.9 4 0 2 .9 4 0"/>
+</g>
+<path d="M21.8 10h2" stroke="#B88A2E" stroke-width="2" stroke-linecap="round"/>
+</svg>
