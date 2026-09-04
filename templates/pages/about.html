@@ -132,11 +132,11 @@
       heading_id='about-founder-title') }}
   <div class="about-founder__inner">
     <div class="about-founder__portrait">
-      <img class="about-founder__img"
-           src="{{ url_for('static', filename='img/founder/accountability-export.jpg') }}"
-           alt="{{ _('Export shipment coordination at a port') }}"
-           width="480" height="640" loading="lazy" decoding="async">
-    </div>
+  <img class="about-founder__img"
+       src="{{ url_for('static', filename='img/about/accountability-export.jpg') }}"
+       alt="{{ _('Export shipment coordination at a port') }}"
+       width="480" height="640" loading="lazy" decoding="async">
+</div>
     <div class="about-founder__text">
       <p>{{ _("Royal Exotic Farms is led by its founding family, who remain directly involved in — and accountable for — the company’s trade relationships.") }}</p>
       {{ button(_("Learn about our leadership"), endpoint='main.founder', variant='tertiary') }}
