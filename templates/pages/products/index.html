@@ -1,0 +1,160 @@
+{# =============================================================================
+   templates/pages/products/index.html
+   Products overview. Extends base.html; consumes ONLY approved Batch 2
+   components (macros). No new components, no CSS, no JS.
+
+   Locked section order (Architecture Lock, products index):
+     Hero -> Flagship (banana) -> Supporting products -> Quality & handling
+     -> Packaging & export readiness -> Closing CTA.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, products
+     optional: contact_actions (global), whatsapp_message
+
+   Honest throughout: products are sourced through established supplier networks;
+   no owned farms or cold storage are claimed; no volumes are stated.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import product_card, value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-products{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Products") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% if products %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+    {%- for product in products %}
+    { "@type": "ListItem", "position": {{ loop.index }}, "name": {{ product.name | tojson }}, "url": {{ url_for('products.detail', slug=product.slug, _external=True) | tojson }} }{{ "," if not loop.last }}
+    {%- endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% set featured_products = (products | selectattr('featured') | list) if products else [] %}
+{% set supporting_products = (products | rejectattr('featured') | list) if products else [] %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="products-hero" aria-labelledby="products-hero-title">
+  {{ section_opener(
+      eyebrow=_("What We Export"),
+      heading=_("Our products"),
+      lead=_("Quality produce sourced through established supplier networks and prepared for export to Gulf buyers. Select a product for specifications, or send an inquiry."),
+      heading_level='h1',
+      heading_id='products-hero-title') }}
+  <div class="products-hero__actions">
+    {{ button(_("Export Inquiry"), endpoint='forms.export_inquiry_page', variant='primary', size='lg') }}
+    {{ button(_("Become an Import Partner"), endpoint='forms.import_partner_page', variant='secondary', size='lg') }}
+  </div>
+</section>
+
+{# ----------------------------------------------------------- FLAGSHIP ----- #}
+{% if featured_products %}
+<section class="products-featured" aria-labelledby="products-featured-title">
+  {{ section_opener(
+      eyebrow=_("Flagship"),
+      heading=_("Our flagship export"),
+      lead=_("Bananas are our strongest and most established product category."),
+      heading_level='h2',
+      heading_id='products-featured-title') }}
+  <div class="products-featured__grid">
+    {% for product in featured_products %}
+      {{ product_card(product, featured=True, heading_level='h3', eager=loop.first) }}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# Procurement realism note: sets correct expectations, signals export experience,
+   prevents catalogue assumptions. Renders regardless of flagship presence. #}
+<p class="products-note">{{ _("Product specifications, packaging, and export availability can vary by season and destination market. For current export suitability, please contact Royal Exotic Farms directly.") }}</p>
+
+{# -------------------------------------------------------- SUPPORTING ------ #}
+{% if supporting_products %}
+<section class="products-supporting" aria-labelledby="products-supporting-title">
+  {{ section_opener(
+      eyebrow=_("Also Exported"),
+      heading=_("Supporting products"),
+      heading_level='h2',
+      heading_id='products-supporting-title') }}
+  <div class="products-supporting__grid">
+    {% for product in supporting_products %}
+      {{ product_card(product, featured=False, heading_level='h3') }}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ------------------------------------------------ QUALITY & HANDLING ------ #}
+<section class="products-quality" aria-labelledby="products-quality-title">
+  {{ section_opener(
+      eyebrow=_("How We Source"),
+      heading=_("Sourced through networks, handled with care"),
+      lead=_("We source through established supplier networks and coordinate grading and quality for each order. We are an export and trading company — we do not own farms or cold-storage facilities, and we say so plainly."),
+      heading_level='h2',
+      heading_id='products-quality-title') }}
+  <div class="products-quality__grid">
+    {{ value_card(
+        _("Network sourcing"),
+        _("Produce sourced through vetted supplier networks across India."),
+        icon='network.svg') }}
+    {{ value_card(
+        _("Quality coordination"),
+        _("Grading and quality coordinated against each buyer's requirements."),
+        icon='check.svg') }}
+  </div>
+</section>
+
+{# --------------------------------------- PACKAGING & EXPORT READINESS ----- #}
+<section class="products-readiness" aria-labelledby="products-readiness-title">
+  {{ section_opener(
+      eyebrow=_("Export Readiness"),
+      heading=_("Packaged and documented for export"),
+      lead=_("Each shipment is prepared for export to Gulf retail and wholesale buyers, with documentation handled for clearance."),
+      heading_level='h2',
+      heading_id='products-readiness-title') }}
+  <div class="products-readiness__grid">
+    {{ value_card(
+        _("Export packaging"),
+        _("Packaging prepared for export to Gulf retail and wholesale buyers."),
+        icon='ship.svg') }}
+    {{ value_card(
+        _("Documentation handled"),
+        _("Export documentation prepared for smooth clearance at destination."),
+        icon='document.svg') }}
+  </div>
+  <p class="products-readiness__more">
+    {{ button(_("See our full export process"), endpoint='main.export_process', variant='tertiary') }}
+  </p>
+</section>
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Need details or pricing on a product?"),
+    text=_("Send an export inquiry with your product and requirements, and we will respond promptly."),
+    primary={'label': _("Export Inquiry"), 'endpoint': 'forms.export_inquiry_page'},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='products-cta-title') }}
+
+{% endblock %}
