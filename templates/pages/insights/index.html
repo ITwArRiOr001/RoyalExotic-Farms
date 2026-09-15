@@ -117,11 +117,10 @@
   <ul class="insights-categories__list" role="list">
     {% for cat in categories %}
     <li class="insights-categories__item">
-      {% if cat is mapping %}
-      <a href="{{ url_for('insights.index', category=cat.slug) }}">{{ cat.label }}</a>
-      {% else %}
-      <span>{{ cat }}</span>
-      {% endif %}
+      {# Non-interactive browse labels: the insights index does not filter by
+         category, so these are not links (they would imply a filter that does
+         not exist). #}
+      <span>{{ cat.label if cat is mapping else cat }}</span>
     </li>
     {% endfor %}
   </ul>
