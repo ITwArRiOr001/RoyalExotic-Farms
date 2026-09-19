@@ -9,14 +9,31 @@ template's `article.body | safe`. Filenames are slugs.
 Returned article dicts match the frozen template contract:
   slug, title, description, category, date, date_display, author, hero_image,
   thumbnail, image_alt, read_time, featured, body(html)
+
+PUBLISHING GATE — a Markdown file becomes a public article (index card, route,
+sitemap entry) only if ALL of these hold; otherwise it is skipped and logged:
+  - the filename (= URL slug) is lowercase kebab-case: ^[a-z0-9]+(-[a-z0-9]+)*$
+  - the front matter parses
+  - `title` is a non-empty string
+  - `date` is a valid calendar date (YAML date or ISO "YYYY-MM-DD")
+  - the Markdown body is non-empty
+This stops an accidental empty/stray file (e.g. a stray "DFS.md") from creating a
+broken public article. Media paths are NOT validated here; templates resolve
+them via static_asset() and fall back safely (app/assets.py).
 """
 import os
+import re
+import logging
 import datetime
 import frontmatter
 import markdown as md
 import bleach
 
+log = logging.getLogger(__name__)
+
 _CACHE = {}
+
+_SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 _ALLOWED_TAGS = list(bleach.sanitizer.ALLOWED_TAGS) + [
     "p", "h2", "h3", "h4", "pre", "hr", "br", "img", "figure", "figcaption",
@@ -46,24 +63,64 @@ def _render_body(text):
     return bleach.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS, strip=True)
 
 
+def _parse_date(value):
+    """Return a datetime.date for a YAML date/datetime or ISO string, else None."""
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    if isinstance(value, str):
+        try:
+            return datetime.date.fromisoformat(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _validate(fname, slug, meta, body):
+    """Return a list of reasons this file is NOT publishable (empty = valid)."""
+    problems = []
+    if not _SLUG_RE.match(slug):
+        problems.append("filename is not a lowercase kebab-case slug")
+    title = meta.get("title")
+    if not isinstance(title, str) or not title.strip():
+        problems.append("missing or empty 'title'")
+    if _parse_date(meta.get("date")) is None:
+        problems.append("missing or invalid 'date'")
+    if not (body or "").strip():
+        problems.append("empty body")
+    return problems
+
+
 def _load_dir(base_path, locale):
     directory = _dir(base_path, locale)
     articles = []
     if not os.path.isdir(directory):
         return articles
-    for fname in os.listdir(directory):
+    for fname in sorted(os.listdir(directory)):
         if not fname.endswith(".md"):
             continue
         slug = os.path.splitext(fname)[0]
-        post = frontmatter.load(os.path.join(directory, fname))
+        path = os.path.join(directory, fname)
+        try:
+            post = frontmatter.load(path)
+        except Exception as exc:  # malformed YAML / unreadable file
+            log.warning("insights: skipped %s/%s — front matter could not be parsed (%s)",
+                        locale, fname, exc)
+            continue
         meta = post.metadata or {}
-        raw_date = meta.get("date")
+        problems = _validate(fname, slug, meta, post.content)
+        if problems:
+            log.warning("insights: skipped %s/%s — not publishable: %s",
+                        locale, fname, "; ".join(problems))
+            continue
+        raw_date = _parse_date(meta.get("date"))
         articles.append({
             "slug": slug,
-            "title": meta.get("title", slug.replace("-", " ").title()),
+            "title": meta["title"].strip(),
             "description": meta.get("description"),
             "category": meta.get("category"),
-            "date": str(raw_date) if raw_date else None,
+            "date": raw_date.isoformat(),
             "date_display": _fmt_date(raw_date),
             "author": meta.get("author"),
             "hero_image": meta.get("hero_image"),
