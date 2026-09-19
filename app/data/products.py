@@ -43,8 +43,8 @@ def get_products():
                               "Please confirm current availability for your market."),
             "quality_notes": _("Grading and quality are coordinated against your requirements, and each shipment "
                                "is checked before dispatch."),
-            "media": {"card": "img/products/banana-4x3.svg", "hero": "img/products/banana-16x9.svg"},
-            "image_alt": _("Fresh green export bananas in cartons"),
+            "media": {"card": "img/products/banana-4x3.jpg", "hero": "img/products/banana-16x9.jpg"},
+            "image_alt": _("Bunches of ripe yellow bananas on banana leaves"),
         },
         {
             "slug": "onion",
@@ -69,7 +69,7 @@ def get_products():
             ],
             "availability": _("Availability varies by season and destination market — please contact us to confirm."),
             "quality_notes": _("Grading and sizing are coordinated to your requirements before dispatch."),
-            "media": {"card": "img/products/onion-4x3.svg", "hero": "img/products/onion-16x9.svg"},
+            "media": {"card": "img/products/onion-4x3.jpg", "hero": "img/products/onion-16x9.jpg"},
             "image_alt": _("Fresh export onions"),
         },
         {
@@ -94,7 +94,7 @@ def get_products():
             ],
             "availability": _("Availability varies by season and destination — please contact us to confirm suitability."),
             "quality_notes": _("Quality is coordinated to your requirements ahead of dispatch."),
-            "media": {"card": "img/products/coconut-4x3.svg", "hero": "img/products/coconut-16x9.svg"},
+            "media": {"card": "img/products/coconut-4x3.jpg", "hero": "img/products/coconut-16x9.jpg"},
             "image_alt": _("Fresh export coconuts"),
         },
     ]
