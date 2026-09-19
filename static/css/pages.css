@@ -90,6 +90,8 @@
 .product-hero__flag { font-size: var(--text-overline); font-weight: 700; letter-spacing: var(--tracking-overline); text-transform: uppercase; color: var(--color-gold-deep); }
 .product-hero__content { display: grid; gap: var(--space-4); align-content: center; }
 @media (min-width: 1024px) { .product-hero { grid-template-columns: 1.1fr 1fr; gap: var(--space-8); } }
+/* No approved hero image: content spans the row instead of leaving an empty column. */
+@media (min-width: 1024px) { .product-hero--no-media { grid-template-columns: minmax(0, 1fr); } }
 
 .product-specs__list { border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; }
 .product-specs__row { display: grid; gap: var(--space-1); padding: var(--space-4) var(--space-5); border-block-end: 1px solid var(--color-line); }
