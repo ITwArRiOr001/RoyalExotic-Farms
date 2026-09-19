@@ -26,7 +26,24 @@
    template-free (Architecture Lock §1, §4–5). `heading_level` keeps the page
    document outline correct (section <h2> -> cards <h3>). Media is ratio-locked
    with explicit width/height (CLS prevention). RTL-safe markup.
+
+   MEDIA FALLBACK (asset/content architecture):
+     1. the item's own approved image (data layer), if the file exists on disk
+        — checked via the `static_asset()` global (app/assets.py);
+     2. otherwise the semantic, NON-PHOTOGRAPHIC `media_fallback` state below.
+     There are deliberately no placeholder photographs: a stand-in photo could be
+     read as a real product, facility or shipment. The fallback keeps the ratio
+     box (so card grids stay aligned), shows a short visible label, and is hidden
+     from assistive technology (it conveys no content).
    ============================================================================= #}
+
+{# ---------------------------------------------------------------------------
+   media_fallback()  — "image unavailable" state rendered INSIDE a ratio-locked
+   media container. Non-photographic, decorative, no network request.
+   --------------------------------------------------------------------------- #}
+{% macro media_fallback() -%}
+<span class="media-fallback" aria-hidden="true"><span class="media-fallback__label">{{ _('Image unavailable') }}</span></span>
+{%- endmacro %}
 
 {# ---------------------------------------------------------------------------
    product_card(product, featured, heading_level, eager)
@@ -39,13 +56,16 @@
    --------------------------------------------------------------------------- #}
 {% macro product_card(product, featured=false, heading_level='h3', eager=false) %}
 {%- set _alt = product.image_alt if (product.image_alt is defined and product.image_alt) else (product.name if product.name else _('Product image')) -%}
+{%- set _card = static_asset(product.media.card) if (product.media and product.media.card) else none -%}
 <article class="product-card{% if featured %} product-card--featured{% endif %}">
   <span class="product-card__media">
+    {% if _card %}
     <img class="product-card__img"
-         src="{{ url_for('static', filename=(product.media.card if product.media and product.media.card else 'img/placeholders/product-4x3.svg')) }}"
+         src="{{ url_for('static', filename=_card) }}"
          alt="{{ _alt }}"
          width="600" height="450"
          {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+    {% else %}{{ media_fallback() }}{% endif %}
   </span>
   <div class="product-card__body">
     {% if featured %}<p class="product-card__flag">{{ _('Flagship') }}</p>{% endif %}
@@ -91,6 +111,7 @@
    [R4] eager=True for a featured/above-the-fold article card.
    --------------------------------------------------------------------------- #}
 {% macro article_card(article, featured=false, heading_level='h3', eager=false) %}
+{%- set _thumb = static_asset(article.thumbnail) or static_asset(article.hero_image) -%}
 <article class="article-card{% if featured %} article-card--featured{% endif %}">
   {# [R3] Decorative media link: hidden from AT to avoid duplicate link to the
      same destination as the title link below. #}
@@ -98,11 +119,13 @@
      href="{{ url_for('insights.article', slug=article.slug) }}"
      tabindex="-1" aria-hidden="true">
     <span class="article-card__media">
+      {% if _thumb %}
       <img class="article-card__img"
-           src="{{ url_for('static', filename=(article.thumbnail if article.thumbnail else 'img/placeholders/article-16x9.svg')) }}"
+           src="{{ url_for('static', filename=_thumb) }}"
            alt=""
            width="640" height="360"
            {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+      {% else %}{{ media_fallback() }}{% endif %}
     </span>
   </a>
   <div class="article-card__body">
@@ -138,7 +161,7 @@
 {% macro certification_card(cert, mode='full', heading_level='h3') %}
 <article class="certification-card certification-card--{{ mode }}">
   <span class="certification-card__badge" aria-hidden="true">
-    <img src="{{ url_for('static', filename=(cert.badge if cert.badge else 'img/placeholders/cert-badge.svg')) }}" alt="" width="64" height="64">
+    <img src="{{ url_for('static', filename=(static_asset(cert.badge) or 'img/placeholders/cert-badge.svg')) }}" alt="" width="64" height="64">
   </span>
   <div class="certification-card__body">
     <{{ heading_level }} class="certification-card__code">{{ cert.code }}</{{ heading_level }}>
@@ -146,7 +169,8 @@
     {% if cert.status %}<p class="certification-card__status">{{ cert.status }}</p>{% endif %}
 
     <div class="certification-card__actions">
-      {% if cert.document %}
+      {#- Links render only if the PDF actually exists in /static (no 404 links). -#}
+      {% if cert.document and static_asset('docs/certifications/' ~ cert.document) %}
         {%- set _doc = url_for('static', filename='docs/certifications/' ~ cert.document) -%}
         <a class="certification-card__action certification-card__action--open"
            href="{{ _doc }}" target="_blank" rel="noopener"
