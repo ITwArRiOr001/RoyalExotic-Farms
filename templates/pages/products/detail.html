@@ -28,9 +28,11 @@
 
 {% block body_class %}page-product-detail{% endblock %}
 
-{# Resolve hero media + alt once (placeholder fallback; never a broken image) #}
+{# Resolve hero media + alt once. `_hero` is None when no approved image exists on
+   disk: the hero then renders without a media slot (no broken image, no
+   substitute photograph) and structured data omits `image`. #}
 {% set _media = product.media if (product.media is defined and product.media) else none %}
-{% set _hero = (_media.hero if (_media and _media.hero is defined and _media.hero) else 'img/placeholders/product-16x9.svg') %}
+{% set _hero = static_asset(_media.hero) if (_media and _media.hero is defined) else none %}
 {% set _hero_alt = product.image_alt if (product.image_alt is defined and product.image_alt) else product.name %}
 {% set _inquiry_url = url_for('forms.export_inquiry_page', product=product.slug) %}
 
@@ -44,7 +46,9 @@
   "description": {{ product.summary | tojson }}
   {%- endif %},
   "category": {{ (product.category if (product.category is defined and product.category) else _("Agricultural export")) | tojson }},
+  {%- if _hero %}
   "image": {{ url_for('static', filename=_hero, _external=True) | tojson }},
+  {%- endif %}
   "brand": { "@type": "Organization", "name": {{ (org.name if org and org.name else config.SITE_NAME) | tojson }} }
 }
 </script>
@@ -64,7 +68,8 @@
 {% block content %}
 
 {# ---------------------------------------------------------------- HERO ---- #}
-<section class="product-hero" aria-labelledby="product-hero-title">
+<section class="product-hero{% if not _hero %} product-hero--no-media{% endif %}" aria-labelledby="product-hero-title">
+  {% if _hero %}
   <div class="product-hero__media">
     <img class="product-hero__img"
          src="{{ url_for('static', filename=_hero) }}"
@@ -72,6 +77,7 @@
          width="1280" height="720"
          loading="eager" fetchpriority="high">
   </div>
+  {% endif %}
   <div class="product-hero__content">
     {% if product.featured is defined and product.featured %}
     <p class="product-hero__flag">{{ _("Flagship product") }}</p>
