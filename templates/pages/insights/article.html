@@ -23,7 +23,10 @@
 
 {% block body_class %}page-article{% endblock %}
 
-{% set _hero = (article.hero_image if (article.hero_image is defined and article.hero_image) else 'img/placeholders/article-16x9.svg') %}
+{# `_hero` is None when the article has no approved image on disk: the hero
+   figure and structured-data `image` are then omitted (no broken image, no
+   substitute photograph). #}
+{% set _hero = static_asset(article.hero_image) if (article.hero_image is defined) else none %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -40,7 +43,9 @@
   {%- if article.author is defined and article.author %},
   "author": { "@type": "Organization", "name": {{ article.author | tojson }} }
   {%- endif %},
+  {%- if _hero %}
   "image": {{ url_for('static', filename=_hero, _external=True) | tojson }},
+  {%- endif %}
   "publisher": { "@type": "Organization", "name": {{ (org.name if org and org.name else config.SITE_NAME) | tojson }} }
 }
 </script>
@@ -72,6 +77,7 @@
   </header>
 
   {# ----------------------------------------------------------- HERO IMG --- #}
+  {% if _hero %}
   <figure class="article__hero">
     <img class="article__hero-img"
          src="{{ url_for('static', filename=_hero) }}"
@@ -79,6 +85,7 @@
          width="1280" height="720"
          loading="eager" fetchpriority="high">
   </figure>
+  {% endif %}
 
   {# --------------------------------------------------------------- BODY --- #}
   {# Trusted, app-rendered & sanitised HTML from the stored content. #}
