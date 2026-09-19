@@ -12,7 +12,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .config import get_config
 from .extensions import db, migrate, babel, mail, csrf
-from . import i18n, context_processors, errors
+from . import i18n, context_processors, errors, assets
 
 
 def create_app(config_object=None):
@@ -40,6 +40,7 @@ def create_app(config_object=None):
     # i18n (also registers root redirect + url lang injection) + globals + errors
     i18n.init_app(app)
     context_processors.init_app(app)
+    assets.init_app(app)
     errors.init_app(app)
 
     _register_blueprints(app)
