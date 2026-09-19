@@ -24,8 +24,14 @@
 {% set _title = (seo.title if seo and seo.title is defined and seo.title else None) %}
 {% set _desc = (seo.description if seo and seo.description is defined and seo.description else None) %}
 {% set _canonical = (seo.canonical if seo and seo.canonical is defined and seo.canonical else request.url) %}
-{# [CF-03] Resolve OG image: explicit per-page value, else branded config default. #}
-{% set _ogimg = (seo.og_image if seo and seo.og_image is defined and seo.og_image else config.DEFAULT_OG_IMAGE) %}
+{# [CF-03] Resolve OG image: explicit per-page value, else branded config default.
+   Static paths are only emitted if the file exists (static_asset); absolute URLs
+   pass through unchanged. A missing per-page image falls back to the default. #}
+{% set _page_ogimg = (seo.og_image if seo and seo.og_image is defined and seo.og_image else None) %}
+{% set _page_ogimg = (_page_ogimg if (_page_ogimg and '://' in _page_ogimg) else static_asset(_page_ogimg)) %}
+{% set _default_ogimg = config.DEFAULT_OG_IMAGE %}
+{% set _default_ogimg = (_default_ogimg if (_default_ogimg and '://' in _default_ogimg) else static_asset(_default_ogimg)) %}
+{% set _ogimg = _page_ogimg or _default_ogimg %}
 {% set _ogimg_url = (_ogimg if (_ogimg and '://' in _ogimg) else (url_for('static', filename=_ogimg, _external=True) if _ogimg else None)) %}
 
 <title>{% if _title %}{{ _title }} — {{ _site }}{% else %}{{ _site }}{% endif %}</title>
