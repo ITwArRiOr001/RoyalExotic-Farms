@@ -208,6 +208,12 @@
 .value-card__title { font-size: var(--text-h4); margin: 0; }
 .value-card__body { color: var(--color-ink-muted); margin: 0; }
 
+/* ---- Media fallback ("image unavailable") ---------------------------------
+   Fills a ratio-locked media container when no approved image exists
+   (components/cards.html → media_fallback). Deliberately non-photographic. */
+.media-fallback { display: flex; align-items: center; justify-content: center; inline-size: 100%; block-size: 100%; padding: var(--space-4); background-color: var(--color-mist); }
+.media-fallback__label { font-size: var(--text-small); color: var(--color-ink-muted); text-align: center; }
+
 /* ---- Article card --------------------------------------------------------- */
 .article-card { position: relative; display: flex; flex-direction: column; block-size: 100%; background-color: var(--color-white); border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; transition: box-shadow var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard); }
 .article-card__media-link { display: block; }
