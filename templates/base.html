@@ -71,8 +71,11 @@
      Mobile navigation is now a dialog overlay (audit CF-01) defined in header.html. #}
   {% include 'partials/header.html' %}
 
-  {# Primary landmark: each page fills the content block #}
-  <main id="main-content" role="main" tabindex="-1">
+  {# Primary landmark: each page fills the content block.
+     [P0] class="site-main" is REQUIRED: layout.css / pages.css / components.css
+     scope section rhythm, gutters, max-width, surface alternation, hero
+     containment and scroll reveals to `.site-main > section`. #}
+  <main id="main-content" class="site-main" role="main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
 
