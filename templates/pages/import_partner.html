@@ -68,9 +68,12 @@
       heading_id='partner-meaning-title') }}
   <div class="partner-meaning__grid">
     {{ value_card(_("Consistent supply coordination"), _("We coordinate ongoing supply through our networks against your recurring requirements."), icon='network.svg') }}
-    {{ value_card(_("Priority on our flagship line"), _("Partners receive priority attention on our flagship banana category."), icon='leaf.svg') }}
+    {# [P0] Removed "Priority on our flagship line" (an unverifiable commitment
+       that cannot be honoured for several partners at once). Reworded "A named,
+       accountable team" — no team is named anywhere and it implied staff —
+       to the single-contact commitment used on the Export Process page. #}
     {{ value_card(_("Transparent dealing"), _("Clear communication and honest representation of what we can and cannot do."), icon='document.svg') }}
-    {{ value_card(_("A named, accountable team"), _("You work with the same accountable people across every order."), icon='handshake.svg') }}
+    {{ value_card(_("One accountable contact"), _("You deal with the same accountable point of contact across every order."), icon='handshake.svg') }}
   </div>
 </section>
 
