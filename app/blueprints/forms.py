@@ -111,7 +111,7 @@ def export_inquiry_page():
     if prefill and not form.product.data:
         form.product.data = prefill
     seo = make_seo(
-        title=_("Export Inquiry"),
+        title=_("Request Export Details"),
         description=_("Request an export inquiry. Tell us your product and requirements and we will respond promptly."),
     )
     return render_template("pages/export_inquiry.html", seo=seo, form=form, product_options=product_options())
@@ -145,7 +145,7 @@ def submit_export_inquiry():
         status = 503
     else:
         status = 422
-    seo = make_seo(title=_("Export Inquiry"))
+    seo = make_seo(title=_("Request Export Details"))
     return render_template("pages/export_inquiry.html", seo=seo, form=form,
                            product_options=product_options()), status
 
@@ -188,7 +188,7 @@ def submit_contact():
 
 # ------------------------------------------------------ CSRF expiry recovery ----
 _CSRF_RECOVERY = {
-    "forms.submit_export_inquiry": ("pages/export_inquiry.html", ExportInquiryForm, "Export Inquiry"),
+    "forms.submit_export_inquiry": ("pages/export_inquiry.html", ExportInquiryForm, "Request Export Details"),
     "forms.submit_partner": ("pages/import_partner.html", PartnershipForm, "Become an Import Partner"),
     "forms.submit_contact": ("pages/contact.html", ContactForm, "Contact"),
 }
