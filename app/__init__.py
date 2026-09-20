@@ -45,8 +45,40 @@ def create_app(config_object=None):
 
     _register_blueprints(app)
     _security_headers(app)
+    _audit_lead_delivery_config(app)
 
     return app
+
+
+def _audit_lead_delivery_config(app):
+    """[P0] Log, loudly and once per worker start, any configuration under which
+    an inquiry could be accepted but never reach a human. Nothing is changed
+    here — the operator sees the problem in the Render log stream."""
+    log = logging.getLogger("app.config_audit")
+    cfg = app.config
+    problems = []
+    if cfg.get("MAIL_SUPPRESS_SEND"):
+        problems.append("MAIL_SUPPRESS_SEND is on: inquiry notification emails are NOT sent.")
+    if (cfg.get("MAIL_SERVER") or "localhost") in {"localhost", "127.0.0.1"}:
+        problems.append("MAIL_SERVER is not configured (localhost): inquiry notifications will fail.")
+    if not cfg.get("MAIL_USERNAME") or not cfg.get("MAIL_PASSWORD"):
+        problems.append("MAIL_USERNAME / MAIL_PASSWORD are not set: authenticated SMTP will fail.")
+    if not (cfg.get("SUBMISSION_NOTIFY_EMAIL") or "").strip():
+        problems.append("SUBMISSION_NOTIFY_EMAIL is empty: no inbox receives inquiries.")
+    if str(cfg.get("SQLALCHEMY_DATABASE_URI", "")).startswith("sqlite"):
+        problems.append("Database is SQLite: on Render the container disk is ephemeral, so stored "
+                        "submissions are erased on every deploy/restart. Use Postgres (DATABASE_URL).")
+    if cfg.get("SECRET_KEY") in (None, "", "dev-only-change-me"):
+        problems.append("SECRET_KEY is the development default.")
+    if not cfg.get("SITE_URL"):
+        problems.append("SITE_URL is not set: JSON-LD uses the request origin instead of the canonical domain.")
+    if app.debug and not os.environ.get("FLASK_ENV", "").lower() == "production":
+        # Development: informational only.
+        for p in problems:
+            log.info("config audit (dev): %s", p)
+        return
+    for p in problems:
+        log.error("PRODUCTION CONFIG: %s", p)
 
 
 def _register_blueprints(app):
