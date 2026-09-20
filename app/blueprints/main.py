@@ -20,7 +20,12 @@ def home():
         description=_("Royal Exotic Farms is an India-based agricultural export and trading company "
                       "supplying bananas, onions, and coconuts to Gulf importers."),
     )
-    return render_template("pages/home.html", seo=seo)
+    # [P0] home.html renders Products and the market list only when these are
+    # supplied; without them both sections silently disappeared.
+    from ..data.products import get_products
+    from ..data.markets import get_markets
+    return render_template("pages/home.html", seo=seo,
+                           products=get_products(), markets=get_markets())
 
 
 @bp.route("/about")
@@ -36,6 +41,7 @@ def about():
 @bp.route("/founder")
 def founder():
     # No standalone founder page exists; send visitors to the About founder section.
+    # (Kept for existing inbound links; About no longer links here — it looped.)
     return redirect(url_for("main.about") + "#about-founder")
 
 
