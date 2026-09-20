@@ -8,7 +8,8 @@ page carries no pricing/offers (not an ecommerce site).
 from flask import Blueprint, render_template, abort
 from flask_babel import gettext as _
 from ..seo import make_seo
-from ..data.products import get_products, get_product, variety_status_labels
+from ..data.products import (get_products, get_product, variety_status_labels,
+                              hero_facts, snapshot_facts, order_steps)
 
 bp = Blueprint("products", __name__)
 
@@ -34,6 +35,10 @@ def detail(slug):
         og_type="product",
         og_image=(product.get("media") or {}).get("hero"),
     )
-    # [P0A] Buyer-facing wording for each variety's status (see data/products.py).
+    # [P1B] Buyer-first view: every row below is derived from data/products.py,
+    # so a data change (e.g. a variety becoming "supplied") updates the page.
     return render_template("pages/products/detail.html", seo=seo, product=product,
-                           variety_status_labels=variety_status_labels())
+                           variety_status_labels=variety_status_labels(),
+                           hero_facts=hero_facts(product),
+                           snapshot_facts=snapshot_facts(product),
+                           order_steps=order_steps())
