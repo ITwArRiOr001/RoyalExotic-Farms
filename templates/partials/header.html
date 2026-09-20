@@ -24,10 +24,14 @@
     <a class="site-header__brand"
        href="{{ url_for('main.home') }}"
        aria-label="{{ org.name if org and org.name else config.SITE_NAME }}">
+      {# [P0] logo.svg is ~580 KB of traced paths and was fetched on every page
+         (plus ~580 KB more for the footer). This 3x raster of the same artwork
+         is ~15 KB. width/height now match the real 3:2 artwork ratio (the old
+         180x40 reserved the wrong box). logo.svg is kept for JSON-LD. #}
       <img class="site-header__logo"
-           src="{{ url_for('static', filename='img/brand/logo.svg') }}"
+           src="{{ url_for('static', filename='img/brand/logo-header.png') }}"
            alt="{{ org.name if org and org.name else config.SITE_NAME }}"
-           width="180" height="40">
+           width="54" height="36">
     </a>
 
     {# Desktop primary navigation #}
