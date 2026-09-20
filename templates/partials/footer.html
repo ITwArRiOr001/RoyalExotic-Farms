@@ -25,9 +25,10 @@
     <div class="site-footer__brand">
       <a href="{{ url_for('main.home') }}"
          aria-label="{{ org.name if org and org.name else config.SITE_NAME }}">
-        <img src="{{ url_for('static', filename='img/brand/logo-light.svg') }}"
+        {# [P0] 2x raster of logo-light.svg (~37 KB vs ~580 KB); true 3:2 box. #}
+        <img src="{{ url_for('static', filename='img/brand/logo-light-footer.png') }}"
              alt="{{ org.name if org and org.name else config.SITE_NAME }}"
-             width="180" height="40">
+             width="180" height="120" loading="lazy" decoding="async">
       </a>
       {% if org and org.registration_line %}
       <p class="site-footer__registration">{{ org.registration_line }}</p>
