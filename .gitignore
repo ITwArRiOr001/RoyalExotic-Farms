@@ -1,0 +1,10 @@
+# [P0] Never commit secrets, the local lead database, or build caches.
+.env
+*.db
+*.sqlite
+*.sqlite3
+instance/
+__pycache__/
+*.pyc
+.venv/
+venv/
