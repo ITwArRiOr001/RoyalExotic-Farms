@@ -115,6 +115,10 @@ def _security_headers(app):
         hsts = app.config.get("HSTS_SECONDS", 0)
         if hsts and request.is_secure:
             resp.headers.setdefault("Strict-Transport-Security", f"max-age={hsts}; includeSubDomains")
+        # [P1B] Public certificate copies: viewable by buyers, but ask search
+        # engines not to index or cache them.
+        if request.path.startswith("/static/docs/"):
+            resp.headers.setdefault("X-Robots-Tag", "noindex, noarchive")
         # Long-cache fingerprinted static assets; keep HTML fresh.
         if resp.mimetype in {"text/css", "application/javascript", "image/svg+xml"}:
             resp.headers.setdefault("Cache-Control", "public, max-age=2592000")
