@@ -15,15 +15,32 @@ def _bool(name, default="false"):
 class Config:
     # --- Identity (exposed to templates as config.SITE_NAME / DEFAULT_OG_IMAGE) ---
     SITE_NAME = os.environ.get("SITE_NAME", "Royal Exotic Farms")
-    SITE_URL = os.environ.get("SITE_URL", "http://localhost:5000")
+    # [P0] No localhost default: an unset SITE_URL previously leaked
+    # "http://localhost:5000" into Organization JSON-LD. Empty => the request's
+    # own origin is used (data/organization.py). Set it in production.
+    SITE_URL = os.environ.get("SITE_URL", "").strip().rstrip("/")
     DEFAULT_OG_IMAGE = os.environ.get("DEFAULT_OG_IMAGE", "img/brand/og-default.jpg")
 
     # --- Organization contact (used by data/organization.py) ---
+    # [P0] Defaults are the company's VERIFIED contact details — the email and
+    # mobile number recorded on the Udyam Registration Certificate
+    # (UDYAM-MH-17-0141659) and the Central KYC record, and supplied by the
+    # owner. The former defaults were placeholders ("+91 00000 00000",
+    # "910000000000", "India", "info@royalexoticfarms.com" — a mailbox never
+    # confirmed to exist). Placeholder-looking env values are also rejected at
+    # runtime (data/organization.py) so they can never reach the page again.
     ORG_LEGAL_NAME = os.environ.get("ORG_LEGAL_NAME", "Royal Exotic Farms")
-    ORG_EMAIL = os.environ.get("ORG_EMAIL", "info@royalexoticfarms.com")
-    ORG_PHONE = os.environ.get("ORG_PHONE", "+91 00000 00000")
-    ORG_WHATSAPP = os.environ.get("ORG_WHATSAPP", "910000000000")  # digits only, wa.me
-    ORG_ADDRESS = os.environ.get("ORG_ADDRESS", "India")
+    ORG_EMAIL = (os.environ.get("ORG_EMAIL") or "royalexoticfarms@gmail.com").strip()
+    ORG_PHONE = (os.environ.get("ORG_PHONE") or "+91 84688 51240").strip()
+    # WhatsApp is OFF until the owner confirms which number runs WhatsApp
+    # (OWNER DECISION). Set e.g. ORG_WHATSAPP=918468851240 (digits only, wa.me).
+    ORG_WHATSAPP = os.environ.get("ORG_WHATSAPP", "")
+    # Public street/locality address is an OWNER DECISION (registered office is
+    # a residential flat). Empty => no street address is shown or emitted.
+    ORG_ADDRESS = os.environ.get("ORG_ADDRESS", "")
+    # State/region is on every registration document (Maharashtra), so it is a
+    # verified, non-sensitive locality line.
+    ORG_REGION = os.environ.get("ORG_REGION", "Maharashtra")
     ORG_COUNTRY = os.environ.get("ORG_COUNTRY", "IN")
 
     # --- Security ---
@@ -49,16 +66,21 @@ class Config:
     BABEL_TRANSLATION_DIRECTORIES = os.environ.get("BABEL_TRANSLATION_DIRECTORIES", "../translations")
 
     # --- Mail (Flask-Mail) ---
-    MAIL_SERVER = os.environ.get("MAIL_SERVER", "localhost")
-    MAIL_PORT = int(os.environ.get("MAIL_PORT", "25"))
+    MAIL_SERVER = os.environ.get("MAIL_SERVER") or "localhost"
+    MAIL_PORT = int(os.environ.get("MAIL_PORT") or "25")
     MAIL_USE_TLS = _bool("MAIL_USE_TLS", "false")
     MAIL_USE_SSL = _bool("MAIL_USE_SSL", "false")
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "no-reply@royalexoticfarms.com")
+    # [P0] Sender must be a mailbox the SMTP account may send as. The previous
+    # default (no-reply@royalexoticfarms.com) belongs to an unverified domain and
+    # would be rejected or spam-foldered by most SMTP providers (e.g. Gmail).
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER") or MAIL_USERNAME or ORG_EMAIL
     MAIL_SUPPRESS_SEND = _bool("MAIL_SUPPRESS_SEND", "true")  # true in dev; false in prod
-    # Where inquiry notifications are delivered:
-    SUBMISSION_NOTIFY_EMAIL = os.environ.get("SUBMISSION_NOTIFY_EMAIL", ORG_EMAIL)
+    # Where inquiry notifications are delivered. [P0] Defaults to the verified
+    # public company email so the public address and the notification inbox
+    # cannot silently diverge.
+    SUBMISSION_NOTIFY_EMAIL = os.environ.get("SUBMISSION_NOTIFY_EMAIL") or ORG_EMAIL
     SEND_ACK_EMAIL = _bool("SEND_ACK_EMAIL", "false")  # optional auto-acknowledgement to sender
 
     # --- Content ---
