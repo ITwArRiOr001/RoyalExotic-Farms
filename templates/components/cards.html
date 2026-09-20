@@ -169,18 +169,14 @@
     {% if cert.status %}<p class="certification-card__status">{{ cert.status }}</p>{% endif %}
 
     <div class="certification-card__actions">
-      {#- Links render only if the PDF actually exists in /static (no 404 links). -#}
-      {% if cert.document and static_asset('docs/certifications/' ~ cert.document) %}
-        {%- set _doc = url_for('static', filename='docs/certifications/' ~ cert.document) -%}
+      {#- [P1B] Public-safe REDACTED copy opens in the browser's PDF viewer
+          (new tab). The link renders only if the file exists (no 404 links).
+          Privacy comes from the redaction itself, not from blocking saving. -#}
+      {% if cert.document and static_asset(cert.document) %}
         <a class="certification-card__action certification-card__action--open"
-           href="{{ _doc }}" target="_blank" rel="noopener"
-           aria-label="{{ _('Open document') }}: {{ cert.code }}">{{ _('Open') }}</a>
-        {# [R5] same-origin /static => download honoured; cross-origin/legacy => opens #}
-        <a class="certification-card__action certification-card__action--download"
-           href="{{ _doc }}" download
-           aria-label="{{ _('Download document') }}: {{ cert.code }}">{{ _('Download') }}</a>
+           href="{{ url_for('static', filename=cert.document) }}" target="_blank" rel="noopener"
+           aria-label="{{ _('View document') }}: {{ cert.label or cert.code }} ({{ _('PDF, opens in a new tab') }})">{{ _('View document') }}</a>
       {% else %}
-        {#- [P0] Documents are intentionally not public (personal data). -#}
         <span class="certification-card__action certification-card__action--pending">{{ _('Copy available on request') }}</span>
       {% endif %}
     </div>
