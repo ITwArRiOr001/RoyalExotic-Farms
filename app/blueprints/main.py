@@ -42,7 +42,7 @@ def about():
 def founder():
     # No standalone founder page exists; send visitors to the About founder section.
     # (Kept for existing inbound links; About no longer links here — it looped.)
-    return redirect(url_for("main.about") + "#about-founder")
+    return redirect(url_for("main.about") + "#about-accountability-title")  # [P1B] anchor now exists
 
 
 @bp.route("/export-process")
