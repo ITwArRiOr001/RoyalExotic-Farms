@@ -112,20 +112,13 @@
   {% endif %}
 </section>
 
-{# ------------------------------------------------------------------- MAP --- #}
-<section class="contact-map" aria-labelledby="contact-map-title">
-  {{ section_opener(
-      eyebrow=_("Location"),
-      heading=_("Where we are based"),
-      heading_level='h2',
-      heading_id='contact-map-title') }}
-  <div class="contact-map__media">
-    <img class="contact-map__img"
-         src="{{ url_for('static', filename='img/markets/office-location.webp') }}"
-         alt="{{ _('Map showing the location of Royal Exotic Farms') }}"
-         width="960" height="540" loading="lazy" decoding="async">
-  </div>
-</section>
+{# [P0] LOCATION MAP REMOVED. The image labelled Jalgaon as the
+   "Royal Exotic Farms business location" with the caption "Connecting farm to
+   the world", while every registration document (IEC, GST, Udyam, APEDA) gives
+   the registered place of business in Vasai West, Palghar, and customs
+   registration is at Nhava Sheva (JNPT) — not "Mumbai Port". Which location to
+   publish, and how to describe Jalgaon (e.g. sourcing region), is an OWNER
+   DECISION. The word "farm" also contradicted the operating model. #}
 
 {# ----------------------------------------------------------- QUICK LINKS --- #}
 <section class="contact-quick" aria-labelledby="contact-quick-title">
