@@ -104,7 +104,7 @@
       heading_level='h2',
       heading_id='about-accountability-title') }}
   <div class="about-accountability__body">
-    <p>{{ _("As a family-owned company, the people you deal with are personally accountable for every shipment and every relationship. We make commitments we can keep and stand behind them.") }}</p>
+    <p>{{ _("As a family-run company, the people you deal with are personally accountable for every shipment and every relationship. We make commitments we can keep and stand behind them.") }}</p>
   </div>
 </section>
 
@@ -130,16 +130,14 @@
       heading=_("Accountable ownership"),
       heading_level='h2',
       heading_id='about-founder-title') }}
-  <div class="about-founder__inner">
-    <div class="about-founder__portrait">
-  <img class="about-founder__img"
-       src="{{ url_for('static', filename='img/about/accountability-export.jpg') }}"
-       alt="{{ _('Export shipment coordination at a port') }}"
-       width="480" height="640" loading="lazy" decoding="async">
-</div>
+  {# [P0] Removed: (1) an AI port scene showing REF-branded cartons and a staff
+     member in an REF shirt at "Mumbai Port Trust" — implied owned port
+     operations and staff; (2) "Learn about our leadership", which linked to
+     /founder, which redirects back to this same section (a loop).
+     A real photograph/name can be added later (OWNER DECISION). #}
+  <div class="about-founder__inner about-founder__inner--text">
     <div class="about-founder__text">
       <p>{{ _("Royal Exotic Farms is led by its founding family, who remain directly involved in — and accountable for — the company’s trade relationships.") }}</p>
-      {{ button(_("Learn about our leadership"), endpoint='main.founder', variant='tertiary') }}
     </div>
   </div>
 </section>
