@@ -379,3 +379,49 @@ a { transition: color var(--dur-micro) var(--ease-standard); }
   opacity: 1; transform: none;
   transition: opacity 500ms var(--ease-entrance), transform 500ms var(--ease-entrance);
 }
+
+/* =============================================================================
+   Phase 0 — Repair (restores behaviour the existing architecture intended;
+   no new visual language). See Phase-0 report.
+   ============================================================================= */
+
+/* [P0-1] Desktop header: the inline primary nav and the persistent header CTA
+   were display:none at every width (no media query ever revealed them), so the
+   site was hamburger-only on desktop. Reveal them at ≥1024px and retire the
+   menu toggle there. The mobile dialog remains the ≤1023px navigation. */
+@media (min-width: 1024px) {
+  .primary-nav--desktop { display: block; }
+  .site-header__cta { display: inline-flex; }
+  .site-header__toggle { display: none; }
+}
+
+/* [P0-2] Secondary buttons on the dark CTA band rendered green-on-green
+   (≈1.2:1 contrast — effectively invisible). Apply the same on-dark outline
+   treatment the home hero already uses locally. */
+.cta-band--dark .btn--secondary { color: var(--color-white); border-color: rgba(255, 255, 255, 0.5); }
+@media (hover: hover) {
+  .cta-band--dark .btn--secondary:hover { background-color: rgba(255, 255, 255, 0.12); border-color: var(--color-white); color: var(--color-white); }
+}
+
+/* [P0-3] Quick-contact collapse toggle (≤640px, revealed by JS) had no visual
+   styling or icon — an unlabeled blank control. Give it a visible, 48px round
+   target with a plus/close glyph that reflects aria-expanded. */
+.contact-actions__toggle {
+  align-items: center; justify-content: center;
+  inline-size: 3rem; block-size: 3rem; padding: 0;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background-color: var(--color-green-800); box-shadow: var(--shadow-md);
+}
+.contact-actions__toggle-icon { position: relative; display: block; inline-size: 1.125rem; block-size: 1.125rem; transition: transform var(--dur-micro) var(--ease-standard); }
+.contact-actions__toggle-icon::before,
+.contact-actions__toggle-icon::after {
+  content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 0;
+  inline-size: 100%; block-size: 2px; margin-block-start: -1px;
+  background-color: var(--color-white); border-radius: 1px;
+}
+.contact-actions__toggle-icon::after { transform: rotate(90deg); }
+.contact-actions__toggle[aria-expanded="true"] .contact-actions__toggle-icon { transform: rotate(45deg); }
+@media (forced-colors: active) {
+  .contact-actions__toggle { border: 1px solid ButtonText; }
+  .contact-actions__toggle-icon::before, .contact-actions__toggle-icon::after { background-color: ButtonText; }
+}
