@@ -48,6 +48,8 @@
 
     <h2 class="legal__heading">{{ _("Information we collect") }}</h2>
     <p>{{ _("When you submit a contact, export inquiry, or partnership form, we collect the details you choose to provide — typically your name, company, email, phone, country, and your message.") }}</p>
+    {# [P0] Disclose what the code actually stores (models.Submission.ip / user_agent). #}
+    <p>{{ _("With each form submission we also record the IP address and browser type it was sent from, to help us detect spam and misuse.") }}</p>
 
     <h2 class="legal__heading">{{ _("How we use your information") }}</h2>
     <p>{{ _("We use this information to respond to your inquiry and to manage any business relationship that follows. We do not use it for unrelated purposes.") }}</p>
