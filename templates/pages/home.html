@@ -117,7 +117,7 @@
         _("We represent our role honestly: an export and trading company that sources and ships — not a claim of owned farms or cold storage."),
         icon='document.svg') }}
     {{ value_card(
-        _("Accountable family ownership"),
+        _("Accountable and family-run"),
         _("A family-run business that stands behind every shipment and relationship."),
         icon='handshake.svg') }}
   </div>
@@ -171,18 +171,17 @@
       lead=_("We currently export to the Gulf, including Oman and Abu Dhabi, and are expanding through trusted, long-term trade relationships."),
       heading_level='h2',
       heading_id='home-markets-title') }}
-  <div class="home-markets__media">
-    <img class="home-markets__map"
-         src="{{ url_for('static', filename='img/markets/gulf-map.svg') }}"
-         alt="{{ _('Map highlighting the Gulf markets Royal Exotic Farms exports to') }}"
-         width="960" height="540" loading="lazy" decoding="async">
-  </div>
+  {# [P0] Map removed: the traced-raster "SVG" (2.2 MB) shaded Saudi Arabia as
+     served, labelled Bahrain (not in the data) and carried garbled text. The
+     data-driven list below is the accurate source until a schematic map exists. #}
   {% if markets %}
   <ul class="home-markets__list" role="list">
     {% for market in markets %}
     <li class="home-markets__market home-markets__market--{{ market.status }}">
       <span class="home-markets__market-name">{{ market.name }}</span>
-      {% if market.status == 'served' %}<span class="home-markets__market-tag">{{ _("Active") }}</span>{% endif %}
+      {# [P0] Target markets previously rendered untagged beside served ones,
+         reading as current presence. Status now always stated (data-driven). #}
+      {% if market.status == 'served' %}<span class="home-markets__market-tag">{{ _("Active") }}</span>{% else %}<span class="home-markets__market-tag">{{ _("In development") }}</span>{% endif %}
     </li>
     {% endfor %}
   </ul>
@@ -199,13 +198,13 @@
       heading=_("A family business accountable for every shipment"),
       heading_level='h2',
       heading_id='home-founder-title') }}
-  <div class="home-founder__inner">
-    <div class="home-founder__portrait">
-  <img class="home-founder__img"
-       src="{{ url_for('static', filename='img/hero/2ndhero-poster.jpg') }}"
-       alt="{{ _('Export shipment coordination and agricultural trade') }}"
-       width="480" height="640" loading="lazy" decoding="async">
-</div>
+  {# [P0] The previous image (REF-branded trucks, warehouse and staff) implied
+     owned logistics infrastructure. Removed; no stand-in imagery until a real
+     photograph is supplied (OWNER DECISION). Text reuses approved About copy. #}
+  <div class="home-founder__inner home-founder__inner--text">
+    <div class="home-founder__text">
+      <p>{{ _("Royal Exotic Farms is led by its founding family, who remain directly involved in — and accountable for — the company’s trade relationships.") }}</p>
+    </div>
   </div>
 </section>
 
