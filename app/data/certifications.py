@@ -10,6 +10,14 @@ Certification shape (matches certification_card): { code, label, status, documen
   document : filename in static/docs/certifications/ (or None -> "Document coming soon")
   badge    : path under static/ (or None -> neutral placeholder img/placeholders/cert-badge.svg)
 
+[P0] PRIVACY: the four original PDFs were REMOVED from static/ (they were
+publicly downloadable from every page). The APEDA RCMC showed the proprietor's
+date of birth and residential address, the IEC showed the residential address,
+and the ICEGATE print-out showed the IP address used for registration. Every
+`document` is therefore None, and the card reads "Copy available on request".
+To publish again, place a REDACTED copy under static/docs/certifications/ and
+set its filename here (OWNER DECISION — see Phase-0 report).
+
 Ordered by export relevance for buyers: export authorisation first, then the
 agri-export membership, customs registration, and the general MSME registration.
 """
@@ -22,28 +30,28 @@ def get_certifications():
             "code": "IEC",
             "label": _("Importer-Exporter Code (DGFT)"),
             "status": _("Issued 2024"),
-            "document": "dgft-iec.pdf",
+            "document": None,
             "badge": None,
         },
         {
             "code": "APEDA",
             "label": _("APEDA Registered Exporter (RCMC)"),
             "status": _("Valid to 16 May 2029"),
-            "document": "apeda-rcmc.pdf",
+            "document": None,
             "badge": None,
         },
         {
             "code": "ICEGATE",
             "label": _("ICEGATE Customs Registration"),
             "status": _("Registered"),
-            "document": "icegate-registration.pdf",
+            "document": None,
             "badge": None,
         },
         {
             "code": "Udyam",
             "label": _("Udyam / MSME Registration"),
             "status": _("Registered"),
-            "document": "udyam-registration.pdf",
+            "document": None,
             "badge": None,
         },
     ]
