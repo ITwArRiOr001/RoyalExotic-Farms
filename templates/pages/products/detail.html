@@ -1,0 +1,212 @@
+{# =============================================================================
+   templates/pages/products/detail.html
+   Single, data-driven product detail (specification) page for ALL products.
+   Extends base.html; consumes ONLY approved Batch 2 components. No new
+   components, no CSS, no JS. NOT an ecommerce page: no cart, no pricing.
+
+   Locked section order (Architecture Lock, product detail):
+     Hero -> Overview -> Varieties/grades -> Specs -> Packaging -> Availability
+     -> Quality/handling -> Export-process relationship -> Reasons -> CTA.
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo, product
+     optional: contact_actions (global), whatsapp_message
+
+   product (data/products.py): slug, name, featured, summary, overview,
+     varieties[{name,note}], specs[{label,value}], packaging[{type,note}],
+     availability, quality_notes, media{hero}, image_alt, category, seo.
+
+   Defensive: optional fields guarded with `is defined` (StrictUndefined-safe).
+   Honest: specifications are indicative and confirmed per order; no fabricated
+   data is introduced by this template.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-product-detail{% endblock %}
+
+{# Resolve hero media + alt once. `_hero` is None when no approved image exists on
+   disk: the hero then renders without a media slot (no broken image, no
+   substitute photograph) and structured data omits `image`. #}
+{% set _media = product.media if (product.media is defined and product.media) else none %}
+{% set _hero = static_asset(_media.hero) if (_media and _media.hero is defined) else none %}
+{% set _hero_alt = product.image_alt if (product.image_alt is defined and product.image_alt) else product.name %}
+{% set _inquiry_url = url_for('forms.export_inquiry_page', product=product.slug) %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.name | tojson }}
+  {%- if product.summary is defined and product.summary %},
+  "description": {{ product.summary | tojson }}
+  {%- endif %},
+  "category": {{ (product.category if (product.category is defined and product.category) else _("Agricultural export")) | tojson }},
+  {%- if _hero %}
+  "image": {{ url_for('static', filename=_hero, _external=True) | tojson }},
+  {%- endif %}
+  "brand": { "@type": "Organization", "name": {{ (org.name if org and org.name else config.SITE_NAME) | tojson }} }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("Products") | tojson }}, "item": {{ url_for('products.index', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 3, "name": {{ product.name | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{# =============================================================================
+   [P1B] Buyer-first hierarchy. Every fact below comes from app/data/products.py
+   (hero_facts / snapshot_facts / varieties / specs / order_steps); nothing is
+   hard-coded here, so data changes (e.g. status "supplied") update the page.
+     1 Hero: name, short commercial description, image | commercial summary + CTA
+     2 Commercial snapshot   3 Variety / sourcing options
+     4 Export specifications  5 How we handle an order   6 Inquiry CTA
+   ============================================================================= #}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="product-hero{% if not _hero %} product-hero--no-media{% endif %}" aria-labelledby="product-hero-title">
+  {% if _hero %}
+  <figure class="product-hero__media">
+    <img class="product-hero__img"
+         src="{{ url_for('static', filename=_hero) }}"
+         alt="{{ _hero_alt }}"
+         width="1280" height="720"
+         loading="eager" fetchpriority="high">
+    {# Representative photographs are labelled from the data layer
+       (media.illustrative / media.caption) until real photography replaces them. #}
+    {% if _media and _media.illustrative and _media.caption %}
+    <figcaption class="media-note">{{ _media.caption }}</figcaption>
+    {% endif %}
+  </figure>
+  {% endif %}
+  <div class="product-hero__content">
+    {{ section_opener(
+        eyebrow=(_("Flagship export product") if (product.featured is defined and product.featured) else _("Export product")),
+        heading=product.name,
+        lead=(product.summary if (product.summary is defined and product.summary) else none),
+        heading_level='h1',
+        heading_id='product-hero-title') }}
+    {% if hero_facts %}
+    <dl class="product-summary" aria-label="{{ _('Commercial summary') }}">
+      {% for row in hero_facts %}
+      <div class="product-summary__row">
+        <dt class="product-summary__label">{{ row.label }}</dt>
+        <dd class="product-summary__value">{{ row.value }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+    {% endif %}
+    <div class="product-hero__actions">
+      {{ button(_("Request Export Details"), href=_inquiry_url, variant='primary', size='lg') }}
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------- COMMERCIAL SNAPSHOT ---- #}
+{% if snapshot_facts %}
+<section class="product-snapshot" aria-labelledby="product-snapshot-title">
+  {{ section_opener(
+      eyebrow=_("Commercial Snapshot"),
+      heading=_("What we confirm with you for each order"),
+      heading_level='h2',
+      heading_id='product-snapshot-title') }}
+  <dl class="product-snapshot__list">
+    {% for row in snapshot_facts %}
+    <div class="product-snapshot__item">
+      <dt class="product-snapshot__label">{{ row.label }}</dt>
+      <dd class="product-snapshot__value">{{ row.value }}</dd>
+    </div>
+    {% endfor %}
+  </dl>
+</section>
+{% endif %}
+
+{# ------------------------------------------- VARIETY / SOURCING OPTIONS --- #}
+{% if product.varieties is defined and product.varieties %}
+<section class="product-varieties" aria-labelledby="product-varieties-title">
+  {{ section_opener(
+      eyebrow=_("Varieties"),
+      heading=_("Variety and sourcing options"),
+      lead=_("Recognised Indian varieties relevant to export orders. The variety, grade and origin we supply are confirmed for each order."),
+      heading_level='h2',
+      heading_id='product-varieties-title') }}
+  <ul class="product-varieties__list" role="list">
+    {% for v in product.varieties %}
+    <li class="product-varieties__item">
+      <span class="product-varieties__name">{{ v.name }}</span>
+      {% if v.note is defined and v.note %}<span class="product-varieties__note">{{ v.note }}</span>{% endif %}
+      {# Status keeps general agricultural facts separate from company claims. #}
+      {% set _vstatus = (variety_status_labels.get(v.status) if (variety_status_labels is defined and variety_status_labels and v.status is defined) else none) %}
+      {% if _vstatus %}<span class="product-varieties__status product-varieties__status--{{ v.status }}">{{ _vstatus }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# ------------------------------------------------ EXPORT SPECIFICATIONS --- #}
+{% if product.specs is defined and product.specs %}
+<section class="product-specs" aria-labelledby="product-specs-title">
+  {{ section_opener(
+      eyebrow=_("Specifications"),
+      heading=_("Export specifications"),
+      lead=_("Indicative. Final specifications are confirmed per order and destination market."),
+      heading_level='h2',
+      heading_id='product-specs-title') }}
+  <dl class="product-specs__list">
+    {% for spec in product.specs %}
+    <div class="product-specs__row">
+      <dt class="product-specs__label">{{ spec.label }}</dt>
+      <dd class="product-specs__value">{{ spec.value }}</dd>
+    </div>
+    {% endfor %}
+  </dl>
+</section>
+{% endif %}
+
+{# ---------------------------------------------- HOW WE HANDLE AN ORDER ---- #}
+{% if order_steps %}
+<section class="product-order" aria-labelledby="product-order-title">
+  {{ section_opener(
+      eyebrow=_("How We Work"),
+      heading=_("How we handle an order"),
+      heading_level='h2',
+      heading_id='product-order-title') }}
+  <ol class="product-order__steps">
+    {% for step in order_steps %}
+    <li class="product-order__step">
+      <span class="product-order__no" aria-hidden="true">{{ loop.index }}</span>
+      <span class="product-order__title">{{ step.title }}</span>
+      <span class="product-order__text">{{ step.text }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="product-order__more">
+    {{ button(_("See our full export process"), endpoint='main.export_process', variant='tertiary') }}
+  </p>
+</section>
+{% endif %}
+
+{# --------------------------------------------------------- CLOSING CTA ---- #}
+{{ cta_band(
+    heading=_("Request export details for %(product)s", product=product.name),
+    text=_("Tell us the destination, quantity, grade and packing you need. A real person reviews every request and replies with availability and details."),
+    primary={'label': _("Request Export Details"), 'href': _inquiry_url},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='product-cta-title') }}
+
+{% endblock %}
