@@ -180,7 +180,8 @@
            href="{{ _doc }}" download
            aria-label="{{ _('Download document') }}: {{ cert.code }}">{{ _('Download') }}</a>
       {% else %}
-        <span class="certification-card__action certification-card__action--pending" aria-disabled="true">{{ _('Document coming soon') }}</span>
+        {#- [P0] Documents are intentionally not public (personal data). -#}
+        <span class="certification-card__action certification-card__action--pending">{{ _('Copy available on request') }}</span>
       {% endif %}
     </div>
   </div>
