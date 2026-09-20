@@ -56,20 +56,12 @@
       heading_id='markets-hero-title') }}
 </section>
 
-{# ------------------------------------------------------------------ MAP ---- #}
-<section class="markets-map" aria-labelledby="markets-map-title">
-  {{ section_opener(
-      eyebrow=_("Our Focus"),
-      heading=_("Focused on the Gulf region"),
-      heading_level='h2',
-      heading_id='markets-map-title') }}
-  <div class="markets-map__media">
-    <img class="markets-map__img"
-         src="{{ url_for('static', filename='img/markets/gulf-map.svg') }}"
-         alt="{{ _('Map of the Gulf region highlighting the markets Royal Exotic Farms exports to and is developing') }}"
-         width="960" height="540" loading="lazy" decoding="async">
-  </div>
-</section>
+{# [P0] MAP SECTION REMOVED. The image (img/markets/gulf-map.svg — a 2.2 MB
+   auto-traced raster, not a real vector) contradicted app/data/markets.py: it
+   shaded Saudi Arabia as a served market, labelled Bahrain (deliberately not in
+   the data), and carried garbled labels and a fake media-player overlay. The
+   served / developing lists below are the accurate, data-driven source until an
+   accurate schematic map is produced (Phase 4). #}
 
 {# -------------------------------------------------------- CURRENT REACH ---- #}
 <section class="markets-current" aria-labelledby="markets-current-title">
