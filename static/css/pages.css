@@ -190,3 +190,17 @@
               color var(--dur-micro) var(--ease-standard);
 }
 .article__body a:hover, .article__body a:focus-visible { text-decoration-color: var(--color-gold); }
+
+/* =============================================================================
+   Phase 0 — Truth pass support (layout only; no new visual language)
+   ============================================================================= */
+/* [P0-4] Founder/accountability blocks without a portrait (misleading stand-in
+   imagery removed; no real photograph supplied yet) span the full row instead
+   of squeezing text into the 18rem portrait column. */
+@media (min-width: 768px) {
+  .home-founder__inner--text, .about-founder__inner--text { grid-template-columns: minmax(0, 1fr); }
+}
+.home-founder__text p, .about-founder__text p { max-inline-size: var(--measure); }
+/* [P0-5] Home market list now renders (route context restored). Use the same
+   served/developing encoding the Markets page already uses (green vs sky rule). */
+.home-markets__market--target { border-inline-start-color: var(--color-sky); }
