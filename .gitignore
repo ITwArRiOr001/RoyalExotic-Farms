@@ -1,0 +1,15 @@
+# [P0] Never commit secrets, the local lead database, or build caches.
+.env
+*.db
+*.sqlite
+*.sqlite3
+instance/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# [P1B] Unredacted certificate originals must never be committed or served.
+# Only redacted copies in static/docs/certifications/public/ are public.
+static/docs/certifications/*.pdf
+private/
