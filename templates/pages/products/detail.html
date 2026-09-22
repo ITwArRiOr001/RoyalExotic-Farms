@@ -116,7 +116,7 @@
 
 {# ------------------------------------------------- COMMERCIAL SNAPSHOT ---- #}
 {% if snapshot_facts %}
-<section class="product-snapshot" aria-labelledby="product-snapshot-title">
+<section class="product-snapshot is-minor" aria-labelledby="product-snapshot-title">
   {{ section_opener(
       eyebrow=_("Commercial Snapshot"),
       heading=_("What we confirm with you for each order"),
@@ -135,7 +135,7 @@
 
 {# ------------------------------------------- VARIETY / SOURCING OPTIONS --- #}
 {% if product.varieties is defined and product.varieties %}
-<section class="product-varieties" aria-labelledby="product-varieties-title">
+<section class="product-varieties is-minor" aria-labelledby="product-varieties-title">
   {{ section_opener(
       eyebrow=_("Varieties"),
       heading=_("Variety and sourcing options"),
@@ -158,7 +158,7 @@
 
 {# ------------------------------------------------ EXPORT SPECIFICATIONS --- #}
 {% if product.specs is defined and product.specs %}
-<section class="product-specs" aria-labelledby="product-specs-title">
+<section class="product-specs is-minor" aria-labelledby="product-specs-title">
   {{ section_opener(
       eyebrow=_("Specifications"),
       heading=_("Export specifications"),
