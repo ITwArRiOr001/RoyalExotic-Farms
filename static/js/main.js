@@ -169,22 +169,26 @@
   }
 
   /* ------------------------------------------------------- Hero video ---- */
+  /* [P2] The poster carries the hero. The video (≈4 MB) is only played on
+     pointer-capable, wide screens, and never under reduced motion or Save-Data
+     — a background loop must never cost a Gulf buyer mobile bandwidth. */
   function initHeroVideo() {
     var video = $(".home-hero__video");
     if (!video) return;
     video.muted = true;
     video.setAttribute("playsinline", "");
-    video.setAttribute("preload", "metadata");
-    if (REDUCED) { try { video.pause(); } catch (e) {} return; }
-    var hero = video.closest(".home-hero");
-    function play() { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
-    function pause() { try { video.pause(); } catch (e) {} }
-    if (hero) {
-      hero.addEventListener("pointerenter", play);
-      hero.addEventListener("pointerleave", pause);
-      hero.addEventListener("focusin", play);
-      hero.addEventListener("focusout", pause);
+    var conn = navigator.connection || {};
+    var small = window.matchMedia("(max-width: 1023px)").matches;
+    var coarse = window.matchMedia("(hover: none)").matches;
+    if (REDUCED || small || coarse || conn.saveData) {
+      video.removeAttribute("autoplay");
+      video.setAttribute("preload", "none");
+      try { video.pause(); } catch (e) {}
+      return;
     }
+    video.setAttribute("preload", "metadata");
+    var p = video.play();
+    if (p && p.catch) p.catch(function () {});
   }
 
   /* --------------------------------------------------- Hero load reveal -- */
@@ -200,30 +204,25 @@
   }
 
   /* ------------------------------------------------- Contact actions ----- */
+  /* [P2] The quick-contact stack is a support, not a competitor: it hides while
+     the footer (which lists every channel) is on screen, and it never collapses
+     into an unlabelled control. Without JS it simply stays visible. */
   function initContactActions() {
     var wrap = $(".contact-actions");
     var toggle = $(".contact-actions__toggle", wrap || document);
     var group = $("#contact-actions-group", wrap || document);
-    if (!wrap || !toggle || !group) return;
-    var mq = window.matchMedia("(max-width: 640px)");
-    function apply() {
-      if (mq.matches) {
-        wrap.classList.add("contact-actions--enhanced");
-        toggle.style.display = "inline-flex";
-        setExpanded(false);
-      } else {
-        wrap.classList.remove("contact-actions--enhanced");
-        toggle.style.display = "none";
-        group.hidden = false;
-        toggle.setAttribute("aria-expanded", "true");
-      }
-    }
-    function setExpanded(v) { group.hidden = !v; toggle.setAttribute("aria-expanded", String(v)); }
-    toggle.addEventListener("click", function () {
-      setExpanded(toggle.getAttribute("aria-expanded") !== "true");
-    });
-    (mq.addEventListener ? mq.addEventListener("change", apply) : mq.addListener(apply));
-    apply();
+    if (!wrap || !group) return;
+    if (toggle) { toggle.hidden = true; toggle.style.display = "none"; }
+    group.hidden = false;
+
+    var footer = $(".site-footer");
+    if (!footer || !("IntersectionObserver" in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        wrap.classList.toggle("is-dismissed", entry.isIntersecting);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+    io.observe(footer);
   }
 
   /* ---------------------------------------------------------- Analytics -- */
