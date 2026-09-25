@@ -1,0 +1,173 @@
+{# =============================================================================
+   templates/pages/about.html
+   About page — a BUSINESS VALIDATION page (not a story page). Extends
+   base.html; consumes ONLY the approved Batch 2 component layer. No new
+   components, no CSS, no JS.
+
+   Section order (About-page validation, per requirements):
+     Hero -> Legal legitimacy (+ trust strip) -> Operating model transparency
+     -> Export experience -> Accountability -> Values -> Founder
+     -> Certifications -> Contact CTA.
+   The founder reinforces accountability; it is NOT the primary subject and
+   does NOT open the page (no startup origin-story pattern).
+
+   Context:
+     required: current_locale, text_dir, nav, org, seo
+     optional: certifications (global), org.founder_name, contact_actions (global)
+
+   Honest throughout: export & trading company sourcing through supplier
+   networks; no owned farms / cold storage claimed; no fabricated scale.
+   ============================================================================= #}
+{% extends 'base.html' %}
+
+{% from 'components/buttons.html' import button %}
+{% from 'components/cards.html' import value_card %}
+{% from 'components/section_opener.html' import section_opener %}
+{% from 'components/cta_band.html' import cta_band %}
+
+{% block body_class %}page-about{% endblock %}
+
+{# Page-specific structured data: breadcrumb (Organization is global in base) #}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ _("Home") | tojson }}, "item": {{ url_for('main.home', _external=True) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ _("About") | tojson }}, "item": {{ request.url | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ---------------------------------------------------------------- HERO ---- #}
+<section class="about-hero" aria-labelledby="about-hero-title">
+  {{ section_opener(
+      eyebrow=_("About the Company"),
+      heading=_("About Royal Exotic Farms"),
+      lead=_("A registered Indian agricultural export and trading company serving buyers across the Gulf."),
+      heading_level='h1',
+      heading_id='about-hero-title') }}
+</section>
+
+{# -------------------------------------------------- LEGAL LEGITIMACY ----- #}
+<section class="about-legitimacy" aria-labelledby="about-legitimacy-title">
+  {{ section_opener(
+      eyebrow=_("Legal Standing"),
+      heading=_("A registered, licensed exporter"),
+      lead=_("Royal Exotic Farms holds the registrations and licenses required for Indian export operations, so buyers can engage with confidence."),
+      heading_level='h2',
+      heading_id='about-legitimacy-title') }}
+  {% set proof_items = [
+    {'label': _("Registered Indian export & trading company"), 'icon': 'badge.svg'},
+    {'label': _("Holds required export registrations & licenses"), 'icon': 'document.svg'},
+    {'label': _("Exporting to the Gulf — including Oman & Abu Dhabi"), 'icon': 'route.svg'}
+  ] %}
+  {% set trust_strip_label = _("Legal and operational standing") %}
+  {% include 'partials/trust_strip.html' %}
+</section>
+
+{# ----------------------------------------------- OPERATING MODEL --------- #}
+<section class="about-model" aria-labelledby="about-model-title">
+  {{ section_opener(
+      eyebrow=_("Operating Model"),
+      heading=_("How we source — stated openly"),
+      heading_level='h2',
+      heading_id='about-model-title') }}
+  <div class="about-model__body">
+    <p>{{ _("Royal Exotic Farms is an export and trading company. We source quality produce through established supplier networks rather than owning farms or cold-storage facilities, and we present that openly.") }}</p>
+    <p>{{ _("For buyers, this is a practical advantage: a single accountable partner coordinates supply, quality, and export documentation across India, instead of you managing fragmented sources directly.") }}</p>
+  </div>
+</section>
+
+{# ---------------------------------------------- EXPORT EXPERIENCE -------- #}
+<section class="about-experience is-minor" aria-labelledby="about-experience-title">
+  {{ section_opener(
+      eyebrow=_("Export Experience"),
+      heading=_("Gulf export activity"),
+      heading_level='h2',
+      heading_id='about-experience-title') }}
+  <div class="about-experience__body">
+    <p>{{ _("We have exported bananas and onions to the Gulf, including Oman and Abu Dhabi. Bananas are our flagship category, and the Gulf remains our primary focus as we expand through established trade relationships.") }}</p>
+    <p>{{ _("Across each order, we coordinate sourcing with our supplier networks, prepare and check shipments against the buyer’s requirements, handle the export documentation needed for clearance, and keep buyers informed from confirmation through delivery. Our aim is to make sourcing from India straightforward and accountable.") }}</p>
+  </div>
+</section>
+
+{# ------------------------------------------------- ACCOUNTABILITY -------- #}
+<section class="about-accountability" aria-labelledby="about-accountability-title">
+  {{ section_opener(
+      eyebrow=_("Accountability"),
+      heading=_("A family business that answers for its work"),
+      heading_level='h2',
+      heading_id='about-accountability-title') }}
+  <div class="about-accountability__body">
+    <p>{{ _("As a family-run company, the people you deal with are personally accountable for every shipment and every relationship. We make commitments we can keep and stand behind them.") }}</p>
+  </div>
+</section>
+
+{# -------------------------------------------------------- VALUES --------- #}
+<section class="about-values is-minor" aria-labelledby="about-values-title">
+  {{ section_opener(
+      eyebrow=_("Our Values"),
+      heading=_("What we stand for"),
+      heading_level='h2',
+      heading_id='about-values-title') }}
+  <div class="about-values__grid">
+    {{ value_card(_("Trust"), _("Honest claims and transparent dealing."), icon='shield.svg') }}
+    {{ value_card(_("Professionalism"), _("Accurate documentation and clear, timely communication."), icon='document.svg') }}
+    {{ value_card(_("Reliability"), _("Consistent supply coordination buyers can plan around."), icon='check.svg') }}
+    {{ value_card(_("Long-term relationships"), _("Built for repeat, partnership-based trade."), icon='handshake.svg') }}
+  </div>
+</section>
+
+{# -------------------------------------------------------- FOUNDER -------- #}
+<section class="about-coordination" aria-labelledby="about-coordination-title">
+  {{ section_opener(
+      eyebrow=_("How We Coordinate"),
+      heading=_("One accountable contact for every order"),
+      lead=_("Our role is coordination: we manage each order through our supplier network and logistics partners, from requirement to dispatch."),
+      heading_level='h2',
+      heading_id='about-coordination-title') }}
+  {# [P1B] Representative port-loading image supports the COORDINATION story.
+     Not an REF-owned facility; nobody in it is identified (neutral alt text,
+     "Illustrative image" caption). Landscape asset => wide media variant. #}
+  <div class="about-coordination__inner about-coordination__inner--wide">
+    <figure class="about-coordination__media">
+      <img class="about-coordination__img"
+           src="{{ url_for('static', filename='img/about/accountability-export.jpg') }}"
+           alt="{{ _('Illustrative scene of export cartons being loaded into a shipping container at a port') }}"
+           width="1672" height="941" loading="lazy" decoding="async">
+      <figcaption class="media-note">{{ _("Illustrative image") }}</figcaption>
+    </figure>
+    <div class="about-coordination__text">
+      <dl class="about-coordination__list">
+        <div class="about-coordination__row"><dt>{{ _("Supplier coordination") }}</dt><dd>{{ _("Supply arranged through established supplier relationships for each order.") }}</dd></div>
+        <div class="about-coordination__row"><dt>{{ _("Quality and packing") }}</dt><dd>{{ _("Grading and packing checked against the agreed specification.") }}</dd></div>
+        <div class="about-coordination__row"><dt>{{ _("Documentation") }}</dt><dd>{{ _("Export documents prepared for the destination market.") }}</dd></div>
+        <div class="about-coordination__row"><dt>{{ _("Dispatch") }}</dt><dd>{{ _("Shipment coordinated with logistics partners.") }}</dd></div>
+        <div class="about-coordination__row"><dt>{{ _("Buyer communication") }}</dt><dd>{{ _("You are kept informed at each step, with issues raised early.") }}</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------- CERTIFICATIONS -------- #}
+{% set cert_section_title = _("Certifications & Registrations") %}
+{% set cert_section_id = 'about-certifications-title' %}
+{% set cert_section_mode = 'full' %}
+{% include 'partials/certifications_section.html' %}
+
+{# --------------------------------------------------------- CONTACT CTA --- #}
+{{ cta_band(
+    heading=_("Talk to a real export partner"),
+    text=_("Request export details for a specific order, or explore a long-term sourcing partnership. We respond promptly."),
+    primary={'label': _("Request Export Details"), 'endpoint': 'forms.export_inquiry_page'},
+    secondary={'label': _("Become an Import Partner"), 'endpoint': 'forms.import_partner_page'},
+    theme='dark',
+    heading_level='h2',
+    heading_id='about-cta-title') }}
+
+{% endblock %}
