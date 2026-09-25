@@ -207,6 +207,17 @@
   /* [P2] The quick-contact stack is a support, not a competitor: it hides while
      the footer (which lists every channel) is on screen, and it never collapses
      into an unlabelled control. Without JS it simply stays visible. */
+  /* [P3A] The floating action only appears when it adds something: it steps
+     aside while ANY of these is on screen —
+       - the footer (it lists every channel and must never be covered),
+       - a form (the control must never sit over a field or submit button),
+       - any on-page button or action link (hero, CTA band, product hero,
+         "View all products ->"): either the page already offers the action,
+         or the control would sit on top of one.
+     It therefore shows during reading stretches and leaves wherever the page
+     speaks for itself. A set tracks which watched elements are visible.
+     Without IntersectionObserver or JS the control simply stays (CSS still
+     hides it from 640px up). */
   function initContactActions() {
     var wrap = $(".contact-actions");
     var toggle = $(".contact-actions__toggle", wrap || document);
@@ -214,15 +225,21 @@
     if (!wrap || !group) return;
     if (toggle) { toggle.hidden = true; toggle.style.display = "none"; }
     group.hidden = false;
+    if (!("IntersectionObserver" in window)) return;
 
-    var footer = $(".site-footer");
-    if (!footer || !("IntersectionObserver" in window)) return;
+    var watched = $$(".site-footer, main form, main .btn");
+    if (!watched.length) return;
+
+    var visible = new Set();
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        wrap.classList.toggle("is-dismissed", entry.isIntersecting);
+        if (entry.isIntersecting) visible.add(entry.target); else visible.delete(entry.target);
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
-    io.observe(footer);
+      wrap.classList.toggle("is-dismissed", visible.size > 0);
+    // The root is extended 72px below the viewport: the control sits in the
+    // bottom ~60px, so it must leave BEFORE a watched element scrolls under it.
+    }, { rootMargin: "0px 0px 72px 0px", threshold: 0 });
+    watched.forEach(function (el) { io.observe(el); });
   }
 
   /* ---------------------------------------------------------- Analytics -- */
