@@ -13,6 +13,12 @@
              headings. Visual weight is reproduced in CSS (Phase 3C). The
              <nav aria-label> landmark continues to name the link region.
 
+   [P3A] Compact corporate footer. Registrations moved OUT of the link grid
+         into their own inline evidence line beneath it (they had formed a
+         fourth column that stood alone below the brand, and on phones a
+         five-row table). Contact channels render as one short list. No link,
+         channel or registration was removed.
+
    Reads: org (identity/contact), nav.footer (columns), certifications, now_year.
    Certification badge rendering will later delegate to the
    certification_card(badge) macro (components/cards.html); a structural list
@@ -28,7 +34,7 @@
         {# [P0] 2x raster of logo-light.svg (~37 KB vs ~580 KB); true 3:2 box. #}
         <img src="{{ url_for('static', filename='img/brand/logo-light-footer.png') }}"
              alt="{{ org.name if org and org.name else config.SITE_NAME }}"
-             width="180" height="120" loading="lazy" decoding="async">
+             width="108" height="72" loading="lazy" decoding="async">
       </a>
       {% if org and org.registration_line %}
       <p class="site-footer__registration">{{ org.registration_line }}</p>
@@ -75,29 +81,29 @@
     </div>
     {% endif %}
 
-    {# Certifications & registrations (badge row; document link when attached) #}
-    {% if certifications %}
-    <section class="site-footer__certs" aria-label="{{ _('Certifications and registrations') }}">
-      {# [CF-02] Non-heading structural label (was <h2>) #}
-      <p class="site-footer__heading">{{ _('Certifications & Registrations') }}</p>
-      <ul class="site-footer__cert-list">
-        {% for cert in certifications %}
-        <li class="site-footer__cert">
-          <span class="site-footer__cert-code">{{ cert.code }}</span>
-          {% if cert.document and static_asset(cert.document) %}
-          <a class="site-footer__cert-link"
-             href="{{ url_for('static', filename=cert.document) }}"
-             target="_blank" rel="noopener"
-             aria-label="{{ _('View document') }}: {{ cert.code }} ({{ _('PDF, opens in a new tab') }})">
-            {{ _('View') }}
-          </a>
-          {% endif %}
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
-    {% endif %}
   </div>
+
+  {# [P3A] Registrations: a single inline evidence line (was a column). #}
+  {% if certifications %}
+  <section class="site-footer__certs" aria-label="{{ _('Certifications and registrations') }}">
+    <p class="site-footer__heading">{{ _('Certifications & Registrations') }}</p>
+    <ul class="site-footer__cert-list">
+      {% for cert in certifications %}
+      <li class="site-footer__cert">
+        <span class="site-footer__cert-code">{{ cert.code }}</span>
+        {% if cert.document and static_asset(cert.document) %}
+        <a class="site-footer__cert-link"
+           href="{{ url_for('static', filename=cert.document) }}"
+           target="_blank" rel="noopener"
+           aria-label="{{ _('View document') }}: {{ cert.code }} ({{ _('PDF, opens in a new tab') }})">
+          {{ _('View') }}
+        </a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
   {# Base bar: copyright + legal #}
   <div class="site-footer__base">
