@@ -61,7 +61,7 @@ def markets():
     seo = make_seo(
         title=_("Markets"),
         description=_("Where Royal Exotic Farms exports today — including Oman and Abu Dhabi — and the "
-                      "markets we are developing through trusted relationships."),
+                      "markets we are developing through established relationships."),
     )
     return render_template("pages/markets.html", seo=seo, markets=get_markets())
 
