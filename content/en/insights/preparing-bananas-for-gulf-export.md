@@ -32,9 +32,11 @@ rather than assumed.
 
 ## Packing and loading
 
-Fruit is packed into standard export cartons and loaded into a temperature-managed
-reefer container. Packing formats are configured to the buyer's handling needs —
-retail and wholesale buyers often want different presentations.
+Fruit is packed into export cartons, and the carton format is configured to the
+buyer's handling needs — retail and wholesale buyers often want different
+presentations. Long-distance sea freight of green fruit is normally moved in a
+temperature-managed reefer container; transport and temperature are confirmed per
+order and destination rather than fixed in advance.
 
 ## Documentation
 
