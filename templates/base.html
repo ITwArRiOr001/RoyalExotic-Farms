@@ -31,7 +31,9 @@
 <head>
   <meta charset="utf-8">
   {# Mobile-first: responsive viewport is mandatory #}
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# [P3A] viewport-fit=cover exposes env(safe-area-inset-*) on notched phones,
+     so the fixed quick-contact clears the home indicator. #}
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0E3B2E">
 
   {# [CF-04] Analytics head slot (GA4 / Tag Manager). Stub until wired;
@@ -85,7 +87,16 @@
   {# [F5] Unified Contact Action System (WhatsApp / Export Inquiry / Email).
      Supersedes the former whatsapp_button.html. Built in Batch 2;
      `ignore missing` keeps this shell runnable until then. #}
+  {# [P3A] Not rendered where the page itself IS the action (the forms and
+     their confirmation page): a floating "Request Export Details" there sat
+     over fields and the submit button and competed with the form. #}
+  {%- set _page_is_the_action = request.endpoint in (
+        'forms.export_inquiry_page', 'forms.submit_export_inquiry',
+        'forms.import_partner_page', 'forms.submit_partner',
+        'main.contact', 'forms.submit_contact', 'forms.success') -%}
+  {% if not _page_is_the_action %}
   {% include 'partials/contact_actions.html' ignore missing %}
+  {% endif %}
 
   {# JavaScript is added in a later phase; block reserved, no JS in foundation.
      JS-phase contract (audit CF-07): mobile-nav dialog open/close, focus trap,
