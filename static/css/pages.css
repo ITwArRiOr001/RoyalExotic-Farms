@@ -57,6 +57,11 @@
   background: var(--color-green-900) url("../img/hero/hero-poster.jpg") center / cover no-repeat;
 }
 .home-hero__video.is-failed { visibility: hidden; }
+/* [P3B.1] The video is shown only while it is actually playing; otherwise the
+   poster behind it shows (initial mobile state, after an off-screen pause,
+   before the first frame, reduced motion, no JS). */
+.home-hero__video { opacity: 0; transition: opacity 400ms var(--ease-standard); }
+.home-hero__media.is-playing .home-hero__video { opacity: 1; }
 .home-hero > .home-hero__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, rgba(10, 44, 34, 0.92) 0%, rgba(10, 44, 34, 0.78) 45%, rgba(10, 44, 34, 0.55) 100%); }
 .home-hero__content { position: relative; z-index: 1; }
 /* Hero copy aligns with the page's left edge (same axis as every section
