@@ -87,14 +87,16 @@
   {# [F5] Unified Contact Action System (WhatsApp / Export Inquiry / Email).
      Supersedes the former whatsapp_button.html. Built in Batch 2;
      `ignore missing` keeps this shell runnable until then. #}
-  {# [P3A] Not rendered where the page itself IS the action (the forms and
-     their confirmation page): a floating "Request Export Details" there sat
-     over fields and the submit button and competed with the form. #}
-  {%- set _page_is_the_action = request.endpoint in (
-        'forms.export_inquiry_page', 'forms.submit_export_inquiry',
-        'forms.import_partner_page', 'forms.submit_partner',
-        'main.contact', 'forms.submit_contact', 'forms.success') -%}
-  {% if not _page_is_the_action %}
+  {# [P3B] Floating "Request Export Details": an ALLOW-list, not a deny-list.
+     Rendered only on the browsing pages where a buyer may want the action
+     mid-page (Home, Products, a product, Markets). Never on Contact, Export
+     Inquiry, Import Partner, the thank-you pages or any other page. Even on
+     the allowed pages main.js shows it only while scrolling back up, and
+     never while a form, the footer, an on-page action, an image or an
+     evidence block (facts, specifications, registrations, market lists,
+     process steps) is where it would sit. #}
+  {%- set _floating_cta_pages = ('main.home', 'products.index', 'products.detail', 'main.markets') -%}
+  {% if request.endpoint in _floating_cta_pages %}
   {% include 'partials/contact_actions.html' ignore missing %}
   {% endif %}
 
