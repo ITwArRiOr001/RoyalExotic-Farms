@@ -99,6 +99,9 @@
         heading_level='h1',
         heading_id='product-hero-title') }}
     {% if hero_facts %}
+    {# [P3B] Names the facts block on phones, where it follows the photograph
+       and the primary action (see pages.css, mobile product hero). #}
+    <p class="product-summary__title" aria-hidden="true">{{ _("Export snapshot") }}</p>
     <dl class="product-summary" aria-label="{{ _('Commercial summary') }}">
       {% for row in hero_facts %}
       <div class="product-summary__row">
