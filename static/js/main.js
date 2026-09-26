@@ -169,26 +169,78 @@
   }
 
   /* ------------------------------------------------------- Hero video ---- */
-  /* [P2] The poster carries the hero. The video (≈4 MB) is only played on
-     pointer-capable, wide screens, and never under reduced motion or Save-Data
-     — a background loop must never cost a Gulf buyer mobile bandwidth. */
+  /* [P3B] Root cause of the "video never plays" reports: the previous gate
+     returned early for ANY viewport below 1024px and for ANY touch/no-hover
+     device, so phones, tablets and a phone in desktop-site mode never played
+     the hero. It also left `autoplay` in the markup, so those same phones
+     downloaded the WebM anyway and discarded it.
+     Policy now:
+       desktop (>= 1024px): hero.mp4 first, hero.webm fallback, autoplay muted;
+       below 1024px: the optimised hero-mobile.* files (same footage);
+       poster only under reduced motion, Save-Data, or a 2G/3G connection;
+       paused while the hero is off-screen; poster shown again on any error. */
   function initHeroVideo() {
     var video = $(".home-hero__video");
     if (!video) return;
-    video.muted = true;
-    video.setAttribute("playsinline", "");
+    var media = video.closest(".home-hero__media");
     var conn = navigator.connection || {};
-    var small = window.matchMedia("(max-width: 1023px)").matches;
-    var coarse = window.matchMedia("(hover: none)").matches;
-    if (REDUCED || small || coarse || conn.saveData) {
+    var slow = /(^|-)2g$|^3g$/.test(conn.effectiveType || "");
+    if (REDUCED || conn.saveData || slow) {
       video.removeAttribute("autoplay");
       video.setAttribute("preload", "none");
-      try { video.pause(); } catch (e) {}
-      return;
+      return;                                   // poster carries the hero
     }
-    video.setAttribute("preload", "metadata");
-    var p = video.play();
-    if (p && p.catch) p.catch(function () {});
+
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      var mp4 = video.getAttribute("data-mobile-mp4");
+      var webm = video.getAttribute("data-mobile-webm");
+      if (mp4) {
+        $$("source", video).forEach(function (s) { s.parentNode.removeChild(s); });
+        [[mp4, "video/mp4"], [webm, "video/webm"]].forEach(function (pair) {
+          if (!pair[0]) return;
+          var s = document.createElement("source");
+          s.src = pair[0]; s.type = pair[1];
+          video.appendChild(s);
+        });
+      }
+    }
+
+    function fail() {
+      video.classList.add("is-failed");        // CSS poster behind shows through
+      if (media) media.classList.add("is-poster-only");
+    }
+    var sources = $$("source", video);
+    if (sources.length) sources[sources.length - 1].addEventListener("error", fail);
+    video.addEventListener("error", fail);
+    video.addEventListener("playing", function () {
+      if (media) media.classList.add("is-playing");
+    });
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    // Do NOT touch `preload` here: changing it on an element that has already
+    // resolved its (desktop) source makes the browser fetch that source before
+    // load() switches to the mobile one. `autoplay` + load() is enough.
+    video.autoplay = true;
+    video.load();
+
+    function tryPlay() {
+      var p = video.play();
+      if (p && p.catch) p.catch(function () { /* autoplay refused: poster stays */ });
+    }
+    tryPlay();
+
+    // Pause while the hero is off-screen; resume when it returns.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { if (video.paused && !video.classList.contains("is-failed")) tryPlay(); }
+          else if (!video.paused) video.pause();
+        });
+      }, { threshold: 0 }).observe(video.closest(".home-hero") || video);
+    }
   }
 
   /* --------------------------------------------------- Hero load reveal -- */
@@ -207,17 +259,17 @@
   /* [P2] The quick-contact stack is a support, not a competitor: it hides while
      the footer (which lists every channel) is on screen, and it never collapses
      into an unlabelled control. Without JS it simply stays visible. */
-  /* [P3A] The floating action only appears when it adds something: it steps
-     aside while ANY of these is on screen —
-       - the footer (it lists every channel and must never be covered),
-       - a form (the control must never sit over a field or submit button),
-       - any on-page button or action link (hero, CTA band, product hero,
-         "View all products ->"): either the page already offers the action,
-         or the control would sit on top of one.
-     It therefore shows during reading stretches and leaves wherever the page
-     speaks for itself. A set tracks which watched elements are visible.
-     Without IntersectionObserver or JS the control simply stays (CSS still
-     hides it from 640px up). */
+  /* [P3B] The floating action is a contextual affordance, not an overlay.
+     It appears only when ALL of these hold:
+       - the reader is scrolling back UP (looking for what to do next) and is
+         past the first screen — while scrolling down they are reading;
+       - no form, footer or on-page button is anywhere on screen (the page
+         already offers the action, or the control would sit on it);
+       - no image or evidence block (facts, specifications, varieties,
+         registrations, market lists, process steps) is in the bottom band
+         where the control sits.
+     Hidden by default; without JS it never appears (CSS), because the header
+     menu and on-page actions already carry the route. */
   function initContactActions() {
     var wrap = $(".contact-actions");
     var toggle = $(".contact-actions__toggle", wrap || document);
@@ -225,21 +277,62 @@
     if (!wrap || !group) return;
     if (toggle) { toggle.hidden = true; toggle.style.display = "none"; }
     group.hidden = false;
+    wrap.classList.add("is-dismissed");
     if (!("IntersectionObserver" in window)) return;
 
-    var watched = $$(".site-footer, main form, main .btn");
-    if (!watched.length) return;
+    var blocking = new Set();
+    var up = false, lastY = window.pageYOffset, ticking = false;
+    var link = $(".contact-actions__item.is-primary .contact-actions__link", wrap) || $("a", wrap);
+    // What the control must never sit on. Checked synchronously under the
+    // control's own box on every scroll frame (an IntersectionObserver
+    // reports a frame late, which let it flash over a list while fading out).
+    var NO_COVER = [
+      "main img", "main figure", "main .btn", "main form", ".site-footer",
+      ".product-summary", ".product-snapshot__list", ".product-specs__list",
+      ".product-varieties__list", ".product-order__steps", ".home-process__steps",
+      ".process-steps__list", ".certifications-section", ".home-markets__list",
+      ".markets-current__list", ".markets-developing__list", ".markets-legend",
+      ".products-note", ".trust-strip"
+    ].join(",");
 
-    var visible = new Set();
+    function clearUnderneath() {
+      if (!link || !document.elementsFromPoint) return true;
+      var r = link.getBoundingClientRect();
+      if (!r.width) return true;
+      var pts = [[r.left + 2, r.top + 2], [r.right - 2, r.top + 2], [r.left + 2, r.bottom - 2],
+                 [r.right - 2, r.bottom - 2], [(r.left + r.right) / 2, (r.top + r.bottom) / 2]];
+      for (var i = 0; i < pts.length; i++) {
+        var stack = document.elementsFromPoint(pts[i][0], pts[i][1]);
+        for (var j = 0; j < stack.length; j++) {
+          if (wrap.contains(stack[j])) continue;
+          if (stack[j].closest && stack[j].closest(NO_COVER)) return false;
+        }
+      }
+      return true;
+    }
+    function update() {
+      var show = up && window.pageYOffset > window.innerHeight * 0.75 &&
+                 blocking.size === 0 && clearUnderneath();
+      wrap.classList.toggle("is-dismissed", !show);
+    }
+    // Any form, footer or on-page button anywhere on screen: the page already
+    // offers the action, so the floating control stays away entirely.
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) visible.add(entry.target); else visible.delete(entry.target);
-      });
-      wrap.classList.toggle("is-dismissed", visible.size > 0);
-    // The root is extended 72px below the viewport: the control sits in the
-    // bottom ~60px, so it must leave BEFORE a watched element scrolls under it.
+      entries.forEach(function (e) { if (e.isIntersecting) blocking.add(e.target); else blocking.delete(e.target); });
+      update();
     }, { rootMargin: "0px 0px 72px 0px", threshold: 0 });
-    watched.forEach(function (el) { io.observe(el); });
+    $$(".site-footer, main form, main .btn").forEach(function (el) { io.observe(el); });
+
+    window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        var y = window.pageYOffset, dy = y - lastY;
+        if (Math.abs(dy) > 8) { up = dy < 0; lastY = y; }
+        update();
+        ticking = false;
+      });
+    }, { passive: true });
   }
 
   /* ---------------------------------------------------------- Analytics -- */
