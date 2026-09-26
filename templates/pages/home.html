@@ -45,12 +45,24 @@
 <section class="home-hero" aria-labelledby="home-hero-title">
   {# Decorative background video, poster-gated. Reduced-motion / slow-connection
      gating is wired in the JS phase; the poster carries the experience until then. #}
+  {# [P3B] HERO VIDEO. No `autoplay` attribute: with it, browsers began
+     downloading the video during parsing, before main.js could apply the
+     device policy (phones fetched the 2.3 MB WebM and then never played it).
+     main.js now chooses the sources and starts playback:
+       >= 1024px  hero.mp4 (H.264, faststart) first, hero.webm as fallback;
+       <  1024px  hero-mobile.mp4 (1.1 MB, same footage and resolution,
+                  re-encoded without audio) first, hero-mobile.webm fallback;
+       reduced motion, Save-Data or a 2G/3G connection -> poster only.
+     The poster is also painted by CSS behind the video, so a blocked, failed
+     or slow video can never leave the hero black. Without JS: poster only. #}
   <div class="home-hero__media" aria-hidden="true">
     <video class="home-hero__video"
-           autoplay muted loop playsinline preload="none"
-           poster="{{ url_for('static', filename='img/hero/hero-poster.jpg') }}">
-      <source src="{{ url_for('static', filename='video/hero/hero.webm') }}" type="video/webm">
+           muted loop playsinline preload="none"
+           poster="{{ url_for('static', filename='img/hero/hero-poster.jpg') }}"
+           data-mobile-mp4="{{ url_for('static', filename='video/hero/hero-mobile.mp4') }}"
+           data-mobile-webm="{{ url_for('static', filename='video/hero/hero-mobile.webm') }}">
       <source src="{{ url_for('static', filename='video/hero/hero.mp4') }}" type="video/mp4">
+      <source src="{{ url_for('static', filename='video/hero/hero.webm') }}" type="video/webm">
     </video>
   </div>
   <div class="home-hero__content">
