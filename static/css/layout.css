@@ -12,7 +12,18 @@
    ============================================================================= */
 
 /* ---- Page shell ----------------------------------------------------------- */
-.site-main { display: block; }
+/* [P3B] main is a column whose LAST section absorbs any spare viewport height.
+   In Phase 3A main itself grew, so on a short page a white band appeared
+   between a dark closing CTA band and the dark footer (two separate endings).
+   Now the closing band extends down to the footer instead. */
+.site-main { display: flex; flex-direction: column; }
+.site-main > :last-child { flex-grow: 1; }
+
+/* [P3B] ONE PAGE ENDING. When a page closes with the dark CTA band, band and
+   footer read as one final chapter: the band's bottom padding is tightened
+   and a single hairline divides the invitation from the reference links. */
+.site-main > section.cta-band--dark:last-child { padding-block-end: var(--space-section-minor); }
+.site-main:has(> section.cta-band--dark:last-child) + .site-footer { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); }
 
 /* Section rhythm + side gutters (full-bleed section, centered content) */
 .site-main > section {

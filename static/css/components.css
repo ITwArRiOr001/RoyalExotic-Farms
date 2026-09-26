@@ -80,7 +80,7 @@
 /* [P2] Quiet authority: a hairline header that gains a shadow only on scroll. */
 .site-header { border-block-end-color: var(--color-line-soft); }
 .site-header__brand { flex: 0 0 auto; display: inline-flex; align-items: center; }
-.site-header__logo { inline-size: auto; block-size: 2.25rem; }
+.site-header__logo { inline-size: auto; block-size: 2.625rem; } /* [P3B] 36 -> 42px: the tagline was illegible */
 .site-header__actions { margin-inline-start: auto; display: flex; align-items: center; gap: var(--space-3); }
 .site-header__cta { display: none; } /* repeated in mobile dialog; shown from 640px */
 /* [P3A] From 640px the header has room for the primary action beside the
@@ -205,8 +205,11 @@
 .site-footer__cert-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
 .site-footer__cert { display: inline-flex; align-items: baseline; gap: var(--space-2); font-size: var(--text-meta); color: rgba(255, 255, 255, 0.7); }
 .site-footer__cert-code { font-weight: 600; color: rgba(255, 255, 255, 0.92); }
-.site-footer__cert-link { font-size: var(--text-meta); color: var(--color-gold) !important; }
-.site-footer__cert-link::after { content: " \2192"; }
+/* [P3B] The code is part of the link; "View ->" follows it from 640px up. */
+.site-footer a.site-footer__cert-link { display: inline-flex; align-items: baseline; gap: var(--space-2); font-size: var(--text-meta); }
+.site-footer__cert-view { color: var(--color-gold); }
+.site-footer__cert-view::after { content: " \2192"; }
+@media (hover: hover) { .site-footer a.site-footer__cert-link:hover .site-footer__cert-code { color: var(--color-gold); } }
 
 .site-footer__base {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: var(--space-2) var(--space-6);
@@ -218,11 +221,41 @@
 .site-footer__legal { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-4); padding: 0; margin: 0; }
 .site-footer__legal a { font-size: var(--text-meta); }
 
-/* Phones: registrations as a tidy 2 x 2 register instead of a wrapped line
-   that left one item alone. */
+/* [P3B] PHONES — a compact corporate footer, read top to bottom as:
+     Company | Products        (navigation first: what a visitor came for)
+     Contact                   (phone, email)
+     Certifications & Registrations: IEC · APEDA · ICEGATE · Udyam
+     ─────────────────────────
+     [small mark] APEDA-registered merchant exporter …
+     © year Royal Exotic Farms · Privacy Policy · Terms
+   The Phase-3A phone footer opened with a 60px logo and description, so the
+   first thing after every page was a second brand block. Nothing is removed:
+   the same links, channels, registrations and legal links, re-ordered. The
+   footer mark is a plain image (not a link), so the visual re-order does not
+   change the keyboard focus order. */
 @media (max-width: 639px) {
-  .site-footer__certs { display: grid; gap: var(--space-2); }
-  .site-footer__cert-list { display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); column-gap: var(--space-6); row-gap: var(--space-1); }
+  .site-footer { display: flex; flex-direction: column; padding-block-start: var(--space-6); }
+  .site-footer__inner { display: contents; }
+  .site-footer__nav, .site-footer__contact, .site-footer__brand {
+    padding-inline: calc(var(--space-inline) + var(--safe-left)) calc(var(--space-inline) + var(--safe-right));
+  }
+  .site-footer__nav { order: 1; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-5) var(--space-4); margin-block-end: var(--space-5); }
+  .site-footer__contact { order: 2; margin-block-end: var(--space-5); }
+  .site-footer__certs { order: 3; display: grid; gap: var(--space-2); padding-block-end: var(--space-5); margin-inline: 0; }
+  .site-footer__brand {
+    order: 4; display: flex; align-items: center; gap: var(--space-4);
+    margin-inline: 0; padding-block: var(--space-5) var(--space-2);
+    border-block-start: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .site-footer__brand img { block-size: 2.75rem; }
+  .site-footer__base { order: 5; border-block-start: 0; padding-block-start: var(--space-2); column-gap: var(--space-4); }
+
+  /* Registrations as one line of linked codes. */
+  .site-footer__cert-list { gap: var(--space-1) 0; }
+  .site-footer__cert + .site-footer__cert::before { content: "\00B7"; color: rgba(255, 255, 255, 0.4); padding-inline: var(--space-2); }
+  .site-footer__cert-view { display: none; }
+  .site-footer a.site-footer__cert-link { min-block-size: 1.5rem; align-items: center; }
+  .site-footer a.site-footer__cert-link .site-footer__cert-code { color: var(--color-gold); }
 }
 /* Tablet: brand across the top, then Company | Products | Contact. The
    contact column gets a floor wide enough for the email address (a third of
@@ -268,6 +301,7 @@
   transition: opacity 220ms var(--ease-standard), transform 220ms var(--ease-standard), visibility 0s linear 0s;
 }
 .contact-actions__toggle { display: none; } /* legacy collapse control; JS keeps it hidden */
+html:not(.has-js) .contact-actions { display: none; }  /* [P3B] JS-managed affordance only */
 .contact-actions__group { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-end; }
 .contact-actions__item:not(.is-primary) { display: none; }
 .contact-actions__link {
@@ -541,7 +575,7 @@ a { transition: color var(--dur-micro) var(--ease-standard); }
 .has-js .contact-actions.is-dismissed,
 .contact-actions.is-dismissed {
   opacity: 0; transform: translateY(8px); visibility: hidden; pointer-events: none;
-  transition: opacity 220ms var(--ease-standard), transform 220ms var(--ease-standard), visibility 0s linear 220ms;
+  transition: none;   /* [P3B] leaves instantly (never fades out over content); fades in only */
 }
 
 /* =============================================================================
