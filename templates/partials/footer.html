@@ -29,13 +29,13 @@
 
     {# Company identity #}
     <div class="site-footer__brand">
-      <a href="{{ url_for('main.home') }}"
-         aria-label="{{ org.name if org and org.name else config.SITE_NAME }}">
-        {# [P0] 2x raster of logo-light.svg (~37 KB vs ~580 KB); true 3:2 box. #}
-        <img src="{{ url_for('static', filename='img/brand/logo-light-footer.png') }}"
-             alt="{{ org.name if org and org.name else config.SITE_NAME }}"
-             width="108" height="72" loading="lazy" decoding="async">
-      </a>
+      {# [P3B] The footer mark is identity, not navigation (the header logo is
+         the home link). As a plain image it can be moved to the foot of the
+         footer on phones without making the keyboard focus order jump. #}
+      <img class="site-footer__logo"
+           src="{{ url_for('static', filename='img/brand/logo-light-footer.png') }}"
+           alt="{{ org.name if org and org.name else config.SITE_NAME }}"
+           width="108" height="72" loading="lazy" decoding="async">
       {% if org and org.registration_line %}
       <p class="site-footer__registration">{{ org.registration_line }}</p>
       {% endif %}
@@ -90,14 +90,18 @@
     <ul class="site-footer__cert-list">
       {% for cert in certifications %}
       <li class="site-footer__cert">
-        <span class="site-footer__cert-code">{{ cert.code }}</span>
+        {# [P3B] The registration code is the link itself: on phones the row
+           reads "IEC · APEDA · ICEGATE · Udyam"; on wider screens a "View"
+           label follows each code. #}
         {% if cert.document and static_asset(cert.document) %}
         <a class="site-footer__cert-link"
            href="{{ url_for('static', filename=cert.document) }}"
            target="_blank" rel="noopener"
            aria-label="{{ _('View document') }}: {{ cert.code }} ({{ _('PDF, opens in a new tab') }})">
-          {{ _('View') }}
+          <span class="site-footer__cert-code">{{ cert.code }}</span><span class="site-footer__cert-view">{{ _('View') }}</span>
         </a>
+        {% else %}
+        <span class="site-footer__cert-code">{{ cert.code }}</span>
         {% endif %}
       </li>
       {% endfor %}
