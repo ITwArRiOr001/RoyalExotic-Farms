@@ -191,7 +191,8 @@
       return;                                   // poster carries the hero
     }
 
-    if (window.matchMedia("(max-width: 1023px)").matches) {
+    var mobile = window.matchMedia("(max-width: 1023px)").matches;
+    if (mobile) {
       var mp4 = video.getAttribute("data-mobile-mp4");
       var webm = video.getAttribute("data-mobile-webm");
       if (mp4) {
@@ -212,34 +213,99 @@
     var sources = $$("source", video);
     if (sources.length) sources[sources.length - 1].addEventListener("error", fail);
     video.addEventListener("error", fail);
-    video.addEventListener("playing", function () {
-      if (media) media.classList.add("is-playing");
+    // [P3B.1] The poster (painted behind the video) is what shows whenever the
+    // video is not actually playing — before the first frame AND after a pause
+    // — so a paused mid-clip frame never replaces it.
+    video.addEventListener("playing", function () { if (media) media.classList.add("is-playing"); });
+    ["pause", "ended", "emptied"].forEach(function (ev) {
+      video.addEventListener(ev, function () { if (media) media.classList.remove("is-playing"); });
     });
 
     video.muted = true;
     video.defaultMuted = true;
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
-    // Do NOT touch `preload` here: changing it on an element that has already
-    // resolved its (desktop) source makes the browser fetch that source before
-    // load() switches to the mobile one. `autoplay` + load() is enough.
-    video.autoplay = true;
-    video.load();
 
     function tryPlay() {
+      if (video.classList.contains("is-failed")) return;
       var p = video.play();
-      if (p && p.catch) p.catch(function () { /* autoplay refused: poster stays */ });
+      if (p && p.catch) p.catch(function () { /* refused: poster stays */ });
     }
-    tryPlay();
+    var hero = video.closest(".home-hero") || video;
 
-    // Pause while the hero is off-screen; resume when it returns.
+    if (!mobile) {
+      // DESKTOP (>= 1024px): unchanged — autoplay hero.mp4 (hero.webm fallback),
+      // pause off-screen, resume on return.
+      // Do NOT touch `preload` here: changing it on an element that has already
+      // resolved its source makes the browser fetch it early. autoplay + load().
+      video.autoplay = true;
+      video.load();
+      tryPlay();
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { if (video.paused) tryPlay(); }
+            else if (!video.paused) video.pause();
+          });
+        }, { threshold: 0 }).observe(hero);
+      }
+      return;
+    }
+
+    /* [P3B.1] MOBILE / TABLET (< 1024px): interaction-gated playback.
+       Initial state is the poster: no autoplay, preload stays "none", and
+       load() is NOT called until the first interaction — calling it on page
+       load made Chromium request the video even with preload="none".
+       ONE meaningful interaction unlocks playback while the hero is on screen:
+         - touching / pressing on the hero (pointerdown or touchstart);
+         - a swipe, wheel or scroll key anywhere while the hero is visible,
+           including momentum scrolling that follows a real input;
+         - pointer hover on the hero, only on devices with true hover and a
+           fine pointer (a small desktop window) — never relied on for touch.
+       The finger need not stay down. Leaving the viewport pauses the video
+       and re-locks it; the next interaction with the hero visible (e.g. the
+       swipe that scrolls it back into view) resumes it — never silently. */
+    video.autoplay = false;
+    video.removeAttribute("autoplay");
+
+    var heroVisible = true, unlocked = false, lastInput = 0, loaded = false;
+    function unlock() {
+      if (!heroVisible) return;
+      unlocked = true;
+      if (!loaded) { loaded = true; video.load(); }   // first byte requested here
+      if (video.paused) tryPlay();
+    }
+    function noteInput() { lastInput = Date.now(); }
+
+    hero.addEventListener("pointerdown", unlock, { passive: true });
+    hero.addEventListener("touchstart", unlock, { passive: true });
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      hero.addEventListener("pointerenter", unlock, { passive: true });
+    }
+    window.addEventListener("touchstart", noteInput, { passive: true });
+    window.addEventListener("touchmove", function () { noteInput(); unlock(); }, { passive: true });
+    window.addEventListener("wheel", function () { noteInput(); unlock(); }, { passive: true });
+    window.addEventListener("keydown", function (e) {
+      if (/^(ArrowDown|ArrowUp|PageDown|PageUp|Home|End| |Spacebar)$/.test(e.key)) { noteInput(); unlock(); }
+    });
+    // Scroll counts only when it follows a real input (momentum after a
+    // swipe), never programmatic scrolling or scroll restoration on load.
+    window.addEventListener("scroll", function () {
+      if (Date.now() - lastInput < 1500) unlock();
+    }, { passive: true });
+
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
-          if (e.isIntersecting) { if (video.paused && !video.classList.contains("is-failed")) tryPlay(); }
-          else if (!video.paused) video.pause();
+          heroVisible = e.isIntersecting;
+          if (!heroVisible) {
+            unlocked = false;
+            if (!video.paused) video.pause();
+          } else if (unlocked && video.paused) {
+            tryPlay();
+          }
         });
-      }, { threshold: 0 }).observe(video.closest(".home-hero") || video);
+      }, { threshold: 0 }).observe(hero);
     }
   }
 
@@ -299,8 +365,11 @@
       if (!link || !document.elementsFromPoint) return true;
       var r = link.getBoundingClientRect();
       if (!r.width) return true;
-      var pts = [[r.left + 2, r.top + 2], [r.right - 2, r.top + 2], [r.left + 2, r.bottom - 2],
-                 [r.right - 2, r.bottom - 2], [(r.left + r.right) / 2, (r.top + r.bottom) / 2]];
+      // While hidden the control sits 8px lower (its entry transform), so the
+      // test area starts 12px above the measured box to cover where it lands.
+      var top = r.top - 12;
+      var pts = [[r.left + 2, top], [r.right - 2, top], [r.left + 2, r.bottom - 2],
+                 [r.right - 2, r.bottom - 2], [(r.left + r.right) / 2, (top + r.bottom) / 2]];
       for (var i = 0; i < pts.length; i++) {
         var stack = document.elementsFromPoint(pts[i][0], pts[i][1]);
         for (var j = 0; j < stack.length; j++) {
